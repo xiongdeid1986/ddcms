@@ -1,0 +1,84 @@
+{include file='ebcms@common/header' /}
+<div class="col-md-12">
+    <h3>
+        <a href="{:url('index')}">浏览日志</a>
+        <a href="{:url('tj')}" class="text-danger">页面统计</a>
+    </h3>
+    <hr>
+    <h5>
+        <a {if condition="!input('times')"}class="text-danger"{/if} href="{:url('tj')}">今日统计</a>
+        <a {if condition="input('times') == 'zuori'"}class="text-danger"{/if} href="{:url('tj?times=zuori')}">昨日统计</a>
+        <a {if condition="input('times') == 'qianri'"}class="text-danger"{/if} href="{:url('tj?times=qianri')}">前日统计</a>
+        <a {if condition="input('times') == 'benzhou'"}class="text-danger"{/if} href="{:url('tj?times=benzhou')}">本周统计</a>
+        <a {if condition="input('times') == 'shangzhou'"}class="text-danger"{/if} href="{:url('tj?times=shangzhou')}">上周统计</a>
+        <a {if condition="input('times') == 'lishi'"}class="text-danger"{/if} href="{:url('tj?times=lishi')}">历史数据</a>
+    </h5>
+    {php}
+        $rows = input('rows', 0, 'intval') ?: 1000;
+        $where = [];
+        $times = input('times');
+        switch ($times) {
+            case 'lishi':
+                break;
+            case 'zuori':
+                $start = strtotime(date('Y-m-d', time() - 86400));
+                $end = strtotime(date('Y-m-d'));
+                $where = [
+                    'create_time' => ['between', [$start, $end]],
+                ];
+                break;
+            case 'qianri':
+                $start = strtotime(date('Y-m-d', time() - 172800));
+                $end = strtotime(date('Y-m-d', time() - 86400));
+                $where = [
+                    'create_time' => ['between', [$start, $end]],
+                ];
+                break;
+            case 'benzhou':
+                $date = date('Y-m-d');
+                $w = date('w', strtotime($date));
+                $start = strtotime("$date -" . ($w ? $w - 1 : 6) . ' days');
+                $where = [
+                    'create_time' => ['between', [$start, time()]],
+                ];
+                break;
+            case 'shangzhou':
+                $date = date('Y-m-d');
+                $w = date('w', strtotime($date));
+                $end = strtotime("$date -" . ($w ? $w - 1 : 6) . ' days');
+                $start = $end - 7 * 24 * 3600;
+                $where = [
+                    'create_time' => ['between', [$start, $end]],
+                ];
+                break;
+
+            default:
+                $start = strtotime(date('Y-m-d'));
+                $where = [
+                    'create_time' => ['between', [$start, time()]],
+                ];
+                break;
+        }
+        $data = \think\Db::name('tongji_tongji')->group('url,title')->where($where)->field('count(*) as num,url,title')->order('num desc')->paginate($rows, true);
+    {/php}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover table-ebcms">
+            <tbody>
+                <tr>
+                    <th>页面</th>
+                    <th>访问次数</th>
+                    <th>标题</th>
+                </tr>
+                {foreach name='data' item='vo'}
+                    <tr>
+                        <td>{$vo.url|mb_substr=0,60}</td>
+                        <td>{$vo.num}</td>
+                        <td>{$vo.title|mb_substr=0,30}</td>
+                    </tr>
+                {/foreach}
+            </tbody>
+        </table>
+    </div>
+    {$data -> render()}
+</div>
+{include file='ebcms@common/footer' /}

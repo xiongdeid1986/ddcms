@@ -1,0 +1,51 @@
+{include file='common/header' /}
+<div class="row">
+    <div class="col-md-3">
+        {include file='common/left' /}
+    </div>
+    <div class="col-md-9">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h1>推广中心</h1>
+                <hr>
+                <div class="form-horizontal well" >
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">推广链接</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" value="{:request() -> root(true)}/?promote={$Think.session.user_id}">
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                {php}
+                $currencys = \ebcms\Config::get('user.base.currency');
+                $promote_reg_ncentive = \ebcms\Config::get('user.promote.promote_reg_ncentive');
+                $promote_access_ncentive = \ebcms\Config::get('user.promote.promote_access_ncentive');
+                {/php}
+                <table class="table table-bordered">
+                    <tr>
+                        <th>活动</th>
+                        {foreach name='currencys' item='vo'}
+                        <th>{$vo}</th>
+                        {/foreach}
+                    </tr>
+                    {if condition="!eb_config('user.promote.promote_closed')"}
+                        <tr>
+                            <th>注册奖励：</th>
+                            {foreach name='currencys' item='vo'}
+                            <td>{present name="$promote_reg_ncentive[$key]"}{$promote_reg_ncentive[$key]}{else /}0{/present}</td>
+                            {/foreach}
+                        </tr>
+                        <tr>
+                            <th>访问奖励：</th>
+                            {foreach name='currencys' item='vo'}
+                            <td>{present name="$promote_access_ncentive[$key]"}{$promote_access_ncentive[$key]}{else /}0{/present}</td>
+                            {/foreach}
+                        </tr>
+                    {/if}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{include file='common/footer' /}

@@ -1,0 +1,45 @@
+{include file='common/header' /}
+<div class="row">
+	<div class="col-md-3">
+		{include file='user/left' /}
+	</div>
+	<div class="col-md-9">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<h1>我的跟帖</h1>
+				<hr>
+				{php}
+					$order = input('order','id');
+					$sort = input('sort','desc');
+					$order = in_array($order,['id','rethread_time','views','rethreads'])?$order:'id';
+					$sort = in_array($sort,['desc','asc'])?$sort:'desc';
+					$lists = \app\forum\model\Rethread::with('thread') -> where(['user_id'=>\think\Session::get('user_id')]) -> order($order.' '.$sort) -> paginate(15);
+					$page = $lists -> render();
+				{/php}
+				<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+				  {foreach name='lists' item='vo'}
+				  <div class="panel panel-default">
+					<div class="panel-heading" >
+						<div class="btn-group btn-group-xs pull-right">
+							{eq name='vo.edit_able' value='1'}
+							<a class="btn btn-default" href="{$vo.edit_url}">编辑</a>
+							{/eq}
+							<a class="btn btn-default" href="{$vo.thread.url}?goto={$vo.id}">查看</a>
+						</div>
+						<span class="text-muted">主贴：</span>
+						<span><a href="#collapse{$key}" data-toggle="collapse">{$vo.thread.title}</a></span>
+					</div>
+					<div id="collapse{$key}" class="panel-collapse collapse in">
+					  <div class="panel-body">
+						{$vo.content|htmlspecialchars_decode}
+					  </div>
+					</div>
+				  </div>
+				  {/foreach}
+				</div>
+				{$page}
+			</div>
+		</div>
+	</div>
+</div>
+{include file='common/footer' /}

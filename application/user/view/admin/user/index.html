@@ -1,0 +1,169 @@
+{include file='ebcms@common/header' /}
+<div class="col-md-12">
+	{php}
+		$grades = \ebcms\Config::get('user.base.grade');
+		$currency = \ebcms\Config::get('user.base.currency');
+		$where = [];
+		if($q = input('q')){
+			if(0 === stripos($q,'id:')){
+				$where['id'] = ['eq',mb_substr($q,3)];
+			}else{
+				$where['nickname|email'] = ['like','%'.$q.'%'];
+			}
+		}
+		if(input('?status') && input('status')!=''){
+			$where['status'] = input('status');
+		}
+		if(input('?grade') && input('grade')!=''){
+			$where['grade'] = input('grade');
+		}
+		$order = [];
+		if(input('order') && input('sort')){
+			$order[input('order')] = (input('sort')=='desc')?'desc':'asc';
+		}
+		$data = \app\user\model\User::with('currency') -> where($where) -> order($order) -> paginate(10,false,['query'=>input('get.')]);
+		$currency = \ebcms\Config::get('user.base.currency');
+	{/php}
+	<h3>
+		<span>用户管理</span>
+		<a href="{:url('add')}"><span class="glyphicon glyphicon-plus text-muted"></span></a>
+	</h3>
+	<p>
+		<form class="form-inline" role="form" action="{:url('index')}" method="GET">
+			<div class="form-group">
+				<input type="text" name="q" value="{:input('q')}" class="form-control" id="q" placeholder="关键字">
+			</div>
+			<div class="form-group">
+				<select class="form-control" name="grade">
+					<option value="">不限</option>
+					{foreach name='grades' item='vo'}
+					<option value="{$key}" {eq name='Request.get.grade' value='$key'}selected{/eq}>{$vo}</option>
+					{/foreach}
+				</select>
+			</div>
+			<div class="form-group">
+				<select class="form-control" name="status">
+					<option value="">不限</option>
+					<option value="1" {eq name='Request.get.status' value='1'}selected{/eq}>正常</option>
+					<option value="0" {eq name='Request.get.status' value='0'}selected{/eq}>停用</option>
+					<option value="99" {eq name='Request.get.status' value='99'}selected{/eq}>未验证</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<select class="form-control" name="order">
+					<option value="">不限</option>
+					<option value="id" {eq name='Request.param.order' value='id'}selected{/eq}>用户ID</option>
+					<option value="login_times" {eq name='Request.param.order' value='login_times'}selected{/eq}>登陆次数</option>
+					<option value="login_time" {eq name='Request.param.order' value='login_time'}selected{/eq}>最后登陆时间</option>
+					<option value="create_time" {eq name='Request.param.order' value='create_time'}selected{/eq}>注册时间</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<select class="form-control" name="sort">
+					<option value="">不限</option>
+					<option value="desc" {eq name='Request.get.sort' value='desc'}selected{/eq}>倒序</option>
+					<option value="asc" {eq name='Request.get.sort' value='asc'}selected{/eq}>正序</option>
+				</select>
+			</div>
+			<button type="submit" class="btn btn-danger">搜索</button>
+		</form>
+	</p>
+	<div class="table-responsive">
+		<table class="table table-bordered table-hover table-ebcms">
+			<tbody>
+				<tr>
+					<th style="width:70px;">id</th>
+					<th style="width:170px;">操作</th>
+					<th style="width: 50px;">状态</th>
+					<th>昵称</th>
+					<th>邮箱</th>
+					<th>会员组</th>
+					<th>财富</th>
+					<th>登陆次数</th>
+					<th>最后登陆时间</th>
+					<th>注册时间</th>
+				</tr>
+				
+				{foreach name='data' item='vo'}
+					<tr>
+						<td>
+							<label>
+								<input type="checkbox" class="ebcms-id" name="id" value="{$vo.id}">
+								{$vo.id}
+							</label>
+						</td>
+						<td>
+							{if condition="check_auth('currency')"}
+								<a href="{:url('currency',['user_id'=>$vo['id']])}" class="btn btn-danger btn-sm" title="财务变更"><span class="glyphicon glyphicon-usd"></span></a>
+							{/if}
+							{if condition="check_auth('msg')"}
+								<a href="{:url('msg',['user_id'=>$vo['id']])}" class="btn btn-primary btn-sm" title="发站内信"><span class="glyphicon glyphicon-bullhorn"></span></a>
+								<a href="{:url('ebcms/index/email',['email'=>$vo['email'],'topic'=>'系统消息'])}" class="btn btn-primary btn-sm" title="发邮件"><span class="glyphicon glyphicon-envelope"></span></a>
+							{/if}
+							{if condition="check_auth('edit')"}
+							<a href="{:url('edit',['id'=>$vo['id']])}" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-pencil"></span></a>
+							{/if}
+						</td>
+						<td>
+							{if condition="check_auth('status')"}
+							<div class="btn-group">
+								{switch name='vo.status'}
+									{case value='99'}
+										<button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown">
+											<span class="glyphicon glyphicon-question-sign"></span>
+										</button>
+									{/case}
+									{case value='1'}
+										<button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">
+											<span class="glyphicon glyphicon-ok-sign"></span>
+										</button>
+									{/case}
+									{default/}
+										<button type="button" class="btn btn-warning btn-sm dropdown-toggle" data-toggle="dropdown">
+											<span class="glyphicon glyphicon-ban-circle"></span>
+										</button>
+								{/switch}
+								<ul class="dropdown-menu" role="menu">
+									<li><a href="javascript:void(0);" class="ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='99'>未验证</a></li>
+									<li><a href="javascript:void(0);" class="ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='1'>正常</a></li>
+									<li><a href="javascript:void(0);" class="ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='0'>屏蔽</a></li>
+								</ul>
+							</div>
+							{/if}
+						</td>
+						<td>
+							<a href="{:url('info?id='.$vo['id'])}">{$vo.nickname}</a>
+						</td>
+						<td>{$vo.email}</td>
+						<td>
+							{$grades[$vo['grade']]|default="未定义"}
+						</td>
+						<td>
+							{foreach name='currency' item='v' key='k'}
+							<span>{$v}：{$vo['currency'][$k]}，</span>
+							{/foreach}
+						</td>
+						<td>{$vo.login_times}</td>
+						<td>{$vo.login_time|date='Y-m-d H:i:s',###}</td>
+						<td>{$vo.create_time|date='Y-m-d H:i:s',###}</td>
+					</tr>
+				{/foreach}
+			</tbody>
+			<tfoot>
+				<tr>
+					<td style="cursor: pointer;" onclick="$('input.ebcms-id').trigger('click');">
+						<span class="glyphicon glyphicon-check"></span> 选择
+					</td>
+					<td colspan="9">
+						<button onclick="$(this).data('ids',EBCMS.FN.getCheckedId('input.ebcms-id:checkbox:checked'));" type="button" class="btn btn-danger btn-sm ebcms-do" url="{:url('delete')}" confirm="确定批量删除？">删除</button>
+						<button onclick="$(this).data('ids',EBCMS.FN.getCheckedId('input.ebcms-id:checkbox:checked'));" type="button" class="btn btn-danger btn-sm ebcms-do" url="{:url('status')}" data-value="0" confirm="确定批量标记为屏蔽用户？">屏蔽</button>
+						<button onclick="$(this).data('ids',EBCMS.FN.getCheckedId('input.ebcms-id:checkbox:checked'));" type="button" class="btn btn-danger btn-sm ebcms-do" url="{:url('status')}" data-value="1" confirm="确定批量标记为正常用户？">正常</button>
+						<button onclick="$(this).data('ids',EBCMS.FN.getCheckedId('input.ebcms-id:checkbox:checked'));" type="button" class="btn btn-danger btn-sm ebcms-do" url="{:url('status')}" data-value="99" confirm="确定批量标记为未验证用户？">未验证</button>
+					</td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+	{$data -> render()}
+</div>
+{include file='ebcms@common/footer' /}

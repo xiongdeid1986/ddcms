@@ -1,0 +1,56 @@
+{include file='index@common/header' /}
+	<div class="row">
+		<div class="col-md-3">
+			{include file='common/left' /}
+		</div>
+		<div class="col-md-9">
+			<div class="panel panel-default">
+				<div class="panel-body">
+					<h1>会员自助升级</h1>
+					<hr>
+					{foreach name='grades' item='vo'}
+					{if condition="isset($config[$key])"}
+						{eq name='next_grade' value='$key'}
+						<div class="alert alert-danger">
+							<h2><button onclick="M.submit('确定升级吗？升级将花费您 {$config[$key]['value']} {$currencys[$config[$key]['currency']]} ');" class="btn btn-danger pull-right">升级</button>{$vo}</h2>
+							<hr>
+							<h4>升级该会员组你需要花费 <strong>{$config[$key]['value']} {$currencys[$config[$key]['currency']]}</strong></h4>
+						</div>
+						{else/}
+						<div class="alert alert-info">
+							<h2>{$vo}{eq name='user.grade' value='$key'} <span class="pull-right text-danger">[当前]</span>{/eq}</h2>
+							<hr>
+							<h4>升级该会员组你需要花费 <strong>{$config[$key]['value']} {$currencys[$config[$key]['currency']]}</strong></h4>
+						</div>
+						{/eq}
+					{/if}
+					{/foreach}
+					<script>
+						var M = {};
+						$(function() {
+							M.submit = function(msg){
+								if (confirm(msg)) {
+									$.ajax({
+										url: '{:url('index')}',
+										type: 'POST',
+										dataType: 'json',
+										data: {},
+										success:function(res){
+											alert(res.msg);
+											if (res.code) {
+												location=location;
+											}
+										},
+										error:function(){
+											alert('服务器错误，请稍后再试！');
+										}
+									});
+								}
+							}
+						});
+					</script>
+				</div>
+			</div>
+		</div>
+	</div>
+{include file='index@common/footer' /}

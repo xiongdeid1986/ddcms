@@ -1,0 +1,292 @@
+<!-- 分页加载 -->
+<script type="text/javascript" src="http://static.ebcms.com/artTemplate/template.js"></script>
+<script>
+    var M = {};
+    $(function() {
+        M.iframe_height = function(){
+            var bodyrel="{$comment_config.key|default='test'}";
+            $('body').attr("rel",bodyrel);
+            $(window.parent.document).find("iframe").each(function(){
+                var tRel=$(this.contentWindow.document).find("body").attr("rel");
+                if(tRel==bodyrel){
+                    var mainheight = $(this).contents().find("body").height()+30;
+                    $(this).height(mainheight);
+                }
+            });
+        }
+        M.array2tree = function(data,idFiled,parentField){
+            idFiled = idFiled||'id';
+            parentField = parentField||'pid';
+            var i,l,treeData = [],tmpMap = [];
+            var count = data.length;
+            for (i = 0, l = count; i < l; i++) {
+                tmpMap[data[i][idFiled]] = data[i];
+            }
+            for (i = 0, l = count; i < l; i++) {
+                if (tmpMap[data[i][parentField]] && data[i][idFiled] != data[i][parentField]) {
+                    if (!tmpMap[data[i][parentField]]['rows'])
+                        tmpMap[data[i][parentField]]['rows'] = [];
+                    tmpMap[data[i][parentField]]['rows'].push(data[i]);
+                } else {
+                    treeData.push(data[i]);
+                }
+            }
+            return treeData;
+        }
+        M.change_captcha = function(selecter){
+            var url = $(selecter).attr('src');
+            if (url) {
+                if (-1 != url.lastIndexOf('#')) {
+                    url = url.substring(0, url.lastIndexOf('#'));
+                }
+                $(selecter).attr('src',url + "#" + Math.random());
+            }
+        }
+        template.config('openTag', '[[');
+        template.config('closeTag', ']]');
+        M.param = {
+            page:1,
+            size:'{$comment_config.size|default='5'}',
+            group:'{$comment_config.group|default='test'}',
+            key:'{$comment_config.key|default='test'}',
+        }
+        M.loadcomment = function(scroll){
+            $('#reply_media').appendTo('#reply_form_contain');
+            $.ajax({
+                url: '{:url('comment/index/index')}',
+                type: 'POST',
+                dataType: 'json',
+                data: M.param,
+                success:function(res){
+                    if (res.code) {
+                        var coms = template('comment-item', {
+                            rows:M.array2tree(res.data.comments.data.concat(res.data.subcomments))
+                        });
+                        $('#comments').html(coms);
+
+                        $('#comment_page').html(res.data.page);
+                        $.each($('#comment_page a'), function(index, val) {
+                            $this = $(this);
+                            $this.attr({
+                                href: '###'
+                            });
+                            num = $this.html();
+                            if ($.isNumeric(num)) {
+                                $this.data('page',num);
+                            }else if(num == '»'){
+                                $this.data('page',Number(M.param.page)+1);
+                            }else if(num == '«'){
+                                $this.data('page',Number(M.param.page)-1);
+                            }
+                            $this.bind('click', function(event) {
+                                M.param.page=$(this).data('page');
+                                M.loadcomment(true);
+                            });
+                        });
+                        if (scroll) {
+                            $("body,html").animate({
+                                scrollTop:$("#comments_top").offset().top,
+                                },100);
+                        }
+                    }else{
+                        alert(res.msg);
+                    }
+                    M.iframe_height();
+                }
+            });
+            return false;
+        };
+        M.comment = function(){
+            $.ajax({
+                url: '{:url('comment/index/add')}',
+                type: 'POST',
+                dataType: 'json',
+                data: $('#comment_form').serialize(),
+                success:function(data){
+                    if (data.code) {
+                        $('#comment_form textarea').val('');
+                        $('#comment_captcha').val('');
+                        M.param.page = 1;
+                        M.loadcomment();
+                    }else{
+                        alert(data.msg);
+                    }
+                    M.change_captcha('#comment_captcha_img');
+                }
+            });
+            return false;
+        };
+        M.reply = function(id){
+            $('#reply_id').val(id);
+            if ($('#comment_id_'+id+' .media-body:eq(0) > p #reply_media').length) {
+                $('#reply_media').toggle();
+            }else{
+                $('#reply_media').appendTo('#comment_id_'+id+' .media-body:eq(0) > p').show();
+            }
+            M.iframe_height();
+        };
+        M.replysubmit = function(){
+            $.ajax({
+                url: '{:url('comment/index/add')}',
+                type: 'POST',
+                dataType: 'json',
+                data: $('#reply_form').serialize(),
+                success:function(data){
+                    if (data.code) {
+                        $('#reply_form textarea').val('');
+                        $('#reply_captcha').val('');
+                        M.loadcomment();
+                    }else{
+                        alert(data.msg);
+                    }
+                    M.change_captcha('#reply_captcha_img');
+                }
+            });
+            M.iframe_height();
+            return false;
+        };
+        M.loadcomment();
+    });
+</script>
+{if condition="true === comment_auth()"}
+<form action="" id="comment_form" onsubmit="return M.comment();">
+    <textarea class="form-control" rows="5" name="content" placeholder="请遵守当地法律法规！"></textarea>
+    <br>
+    <div class="row">
+
+        <!-- 验证码 -->
+        {if condition="true !== comment_captcha()"}
+        <div class="col-sm-8" id="comment_captcha_container">
+            <input type="text" name="captcha" class="form-control" id="comment_captcha" placeholder="请输入验证码">
+            <script>
+                $(function() {
+                    $('#comment_captcha').focus(function(event) {
+                        if (!$('#comment_captcha_img').length) {
+                            $('#comment_captcha').before('<img class="img-rounded img-captcha" width="200" id="comment_captcha_img" onclick="M.change_captcha(\'#comment_captcha_img\');" src="{:url('index/api/captcha?key=comment_add')}" alt="验证码" title="点击更换验证码">')
+                        }
+                        $('#comment_captcha_img').show();
+                    });
+                    $('#comment_captcha_container').hover(function() {
+                        $('#comment_captcha_img').show();
+                    }, function() {
+                        $('#comment_captcha_img').hide();
+                    });
+                });
+            </script>
+        </div>
+        <div class="col-sm-4">
+            <div class="hidden-sm hidden-md hidden-lg" style="height:15px;"></div>
+            <button type="submit" class="btn btn-danger pull-right">提交</button>
+        </div>
+        {else/}
+        <div class="col-sm-12">
+            <div class="hidden-sm hidden-md hidden-lg" style="height:15px;"></div>
+            <button type="submit" class="btn btn-danger pull-right">提交</button>
+        </div>
+        {/if}
+    </div>
+    <input type="hidden" name="group" value="{$comment_config.group|default='test'}">
+    <input type="hidden" name="key" value="{$comment_config.key|default='test'}">
+</form>
+{else /}
+    <div class="alert alert-danger">没有评论权限</div>
+{/if}
+
+<hr>
+<h2 id="comments_top">评论</h2>
+<hr>
+<style>
+    .media{
+        border: 1px solid #ddd;
+        padding: 10px;
+    }
+</style>
+<div id="comments"></div>
+<div id="comment_page"></div>
+<script id="comment-item" type="text/html">
+    [[each rows as v n]]
+        <div class="media" id="comment_id_[[v.id]]">
+          <div class="media-left">
+            <a href="#">
+              <img class="media-object" src="__ROOT__/system/image/avatar.gif" width="40" alt="...">
+            </a>
+          </div>
+          <div class="media-body">
+            <h4 class="media-heading">[[if v.status == 1]]<button class="btn btn-xs btn-default pull-right" style="cursor:pointer;" onclick="M.reply('[[v.id]]');">回复</button>[[/if]][[if v.user]][[v.user.nickname]][[else /]]游客[[/if]][[if v.touser]] 回复 [[v.touser.nickname]][[/if]]</h4>
+            [[if v.status == 1]]<p>[[v.content]]</p>[[else if v.status == 99]]<p class="text-danger">审核中...</p> [[else]] <p class="text-danger">已屏蔽！</p>[[/if]]
+            [[if v.rows]]
+                [[include 'comment-item' v]]
+            [[/if]]
+          </div>
+        </div>
+    [[/each]]
+</script>
+<div id="reply_form_contain" style="display:none;">
+    <div class="media" id="reply_media" style="margin-top:20px;">
+      <div class="media-left">
+        <a href="#">
+          <img class="media-object" src="__ROOT__/system/image/avatar.gif" width="40" alt="...">
+        </a>
+      </div>
+      <div class="media-body">
+        {if condition="true === comment_auth()"}
+        <form action="" id="reply_form" onsubmit="return M.replysubmit();">
+            <textarea class="form-control" rows="3" name="content" placeholder="请遵守当地法律法规！"></textarea>
+            <br>
+            <div class="row">
+
+                {if condition="true !== comment_captcha()"}
+                <!-- 验证码 -->
+                <div class="col-sm-8" id="reply_captcha_container">
+                    <input type="text" name="captcha" class="form-control" id="reply_captcha" placeholder="请输入验证码">
+                    <script>
+                        $(function() {
+                            $('#reply_captcha').focus(function(event) {
+                                if (!$('#reply_captcha_img').length) {
+                                    $('#reply_captcha').before('<img class="img-rounded img-captcha" width="200" id="reply_captcha_img" onclick="M.change_captcha(\'#reply_captcha_img\');" src="{:url('index/api/captcha?key=comment_reply')}" alt="验证码" title="点击更换验证码">')
+                                }
+                                $('#reply_captcha_img').show();
+                            });
+                            $('#reply_captcha_container').hover(function() {
+                                $('#reply_captcha_img').show();
+                            }, function() {
+                                $('#reply_captcha_img').hide();
+                            });
+                        });
+                    </script>
+                </div>
+                <div class="col-sm-4">
+                    <div class="hidden-sm hidden-md hidden-lg" style="height:15px;"></div>
+                    <button type="submit" class="btn btn-danger pull-right">提交</button>
+                </div>
+                {else/}
+                <div class="col-sm-12">
+                    <div class="hidden-sm hidden-md hidden-lg" style="height:15px;"></div>
+                    <button type="submit" class="btn btn-danger pull-right">提交</button>
+                </div>
+                {/if}
+            </div>
+            <input type="hidden" name="reply_id" id="reply_id" value="">
+        </form>
+      {else /}
+          <div class="alert alert-danger">没有评论权限</div>
+      {/if}
+      </div>
+    </div>
+</div>
+<style>
+    /*验证码*/
+    .img-captcha{
+        width: 200px;
+        display: none;
+        cursor: pointer;
+        padding: 0px;
+        position: absolute;
+        height: 50px;
+        top: -50px;
+        border:1px solid #ccc;
+        outline: 0;
+        -webkit-box-shadow: 0 5px 10px rgba(0,0,0,.3);
+        box-shadow: 0 5px 10px rgba(0,0,0,.3);
+    }
+</style>

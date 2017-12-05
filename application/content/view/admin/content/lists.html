@@ -1,0 +1,271 @@
+{include file='ebcms@common/header' /}
+{php}
+	$default_attr = \ebcms\Config::get('content.attr');
+	$where = [];
+	if(input('channel_id')){
+		$where['channel_id'] = input('channel_id');
+	}
+	if(input('q')){
+		$where['title|keywords|description'] = ['like','%'.trim(input('q')).'%'];
+	}
+	if(input('?status') && input('status')!=''){
+		$where['status'] = input('status');
+	}
+	$order = [];
+	if(input('order') && input('sort')){
+		$order[input('order')] = (input('sort')=='desc')?'desc':'asc';
+	}else{
+		$order['id'] = 'desc';
+	}
+	$data = \app\content\model\Content::where($where) -> order($order) -> paginate(10, false, [
+		'query' => input('get.')
+	]);
+{/php}
+<script>
+	var M = {};
+	$(function() {
+		$('.ebcms-thumb').hover(function() {
+			if ($(window).height() - ($(this).offset().top - $(document).scrollTop()) > 248) {
+				var top = $(this).offset().top + $(this).height() - $(document).scrollTop();
+			}else{
+				var top = $(this).offset().top - $(document).scrollTop() - 248;
+			}
+			M.thumb = EBCMS.MSG.dialog({
+				title:'图片预览',
+				padding:0,
+				lock: false,
+				fixed: false,
+				drag: true,
+				left: $(this).offset().left+$(this).width(),
+				top: top,
+				content: '<img src="'+$(this).data('src')+'" alt="" style="height:200px;" />',
+			}).show();
+		}, function() {
+			M.thumb.hide();
+		});
+		M.setattr = function(attr,attrs){
+			var newattrs = attrs.replace(/ /g,',');  
+			if (attrs == '') {
+				attrs = [];
+			}else{
+				attrs = newattrs.split(',');
+			}
+			var index = attrs.indexOf(attr);
+			if (-1 == index) {
+				attrs.push(attr);
+			}else{
+				attrs.splice(index,1);
+			}
+			return attrs.join(',');
+		}
+		$('.ebcms-attr').bind('click', function(event) {
+			var span = $('span',this);
+			var id = $(this).data('id');
+			var attr = [];
+			$.each(span, function(index, val) {
+				attr.push($(this).text());
+			});
+			var str = '<p>设置属性：<p/>';
+			str += '<p><input type="text" class="form-control" style="width:300px;" value="'+attr.join(',')+'" id="new_attr"><p/>';
+			var default_attr = {$default_attr|json_encode};
+			str += '<p>';
+			$.each(default_attr, function(index, val) {
+				str += '<button type="button" class="btn btn-sm btn-danger" onclick="$(\'#new_attr\').val(M.setattr(\''+val+'\',$(\'#new_attr\').val()));">'+val+'</button>&nbsp;';
+			});
+			str += '<p/>';
+			EBCMS.MSG.confirm(str,function(e){
+				EBCMS.CORE.submit({
+					url:'{:url('attr')}',
+					queryParams:{
+						id:id,
+						attrs:$('#new_attr', e.content()).val()
+					},
+					success:function(res){
+						if (res.code) {
+							location  = location;
+						}else{
+							EBCMS.MSG.alert(res.msg);
+						}
+					}
+				});
+			});
+		});
+	});
+</script>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+			{if condition="input('channel_id')"}
+				{php}
+					$channel = \app\content\model\Channel::get(input('channel_id'));
+				{/php}
+				<h3>
+					<span><a href="{$channel.url}" target="_blank">{$channel.title}</a></span>
+					<a href="{:url('add',['channel_id'=>$channel['id']])}"><span class="glyphicon glyphicon-plus text-muted"></span></a>
+				</h3>
+			{else/}
+				<h3>
+					<span>内容管理</span>
+					<a href="{:url('ebcms/config/setting?name=content')}"><span class="glyphicon glyphicon-cog text-muted"></span></a>
+				</h3>
+			{/if}
+			<p>
+				<form class="form-inline" role="form" action="{:url('index')}" method="GET">
+					<div class="form-group">
+						{php}
+							$channels = \app\content\model\Channel::order('sort desc,id asc') -> select();
+						{/php}
+						<select class="form-control" name="channel_id">
+							<option value="0">不限</option>
+							{:\\ebcms\\Func::select($channels,['tree'=>1,'rootitem'=>0],input('channel_id'))}
+						</select>
+					</div>
+					<div class="form-group">
+						<select class="form-control" name="status">
+							<option value="">不限</option>
+							<option value="1" {eq name='Request.get.status' value='1'}selected{/eq}>显示</option>
+							<option value="0" {eq name='Request.get.status' value='0'}selected{/eq}>隐藏</option>
+							<option value="99" {eq name='Request.get.status' value='99'}selected{/eq}>待审</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<select class="form-control" name="order">
+							<option value="id" {eq name='Request.param.order' value='id'}selected{/eq}>ID</option>
+							<option value="click" {eq name='Request.param.order' value='click'}selected{/eq}>点击量</option>
+							<option value="update_time" {eq name='Request.param.order' value='update_time'}selected{/eq}>更新时间</option>
+							<option value="create_time" {eq name='Request.param.order' value='create_time'}selected{/eq}>创建时间</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<select class="form-control" name="sort">
+							<option value="desc" {eq name='Request.get.sort' value='desc'}selected{/eq}>倒序</option>
+							<option value="asc" {eq name='Request.get.sort' value='asc'}selected{/eq}>正序</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<input type="text" name="q" value="{:trim(input('q'))}" class="form-control" id="q" placeholder="关键字">
+					</div>
+					<button type="submit" class="btn btn-danger">搜索</button>
+				</form>
+			</p>
+			<div class="table-responsive">
+				<table class="table table-bordered table-hover table-ebcms">
+					<tbody>
+						<tr>
+							<th style="width: 80px;">ID</th>
+							<th style="width: 130px;">操作</th>
+							<th style="width: 90px;">样式</th>
+							<th style="width: 50px;">状态</th>
+							<th>标题</th>
+							<th>属性</th>
+							<th>浏览量</th>
+							<th>创建时间</th>
+						</tr>
+						{foreach name='data' item='vo'}
+						<tr>
+							<td>
+								<label>
+									<input type="checkbox" name="id" class="ebcms-id" value="{$vo.id}">
+									{$vo.id}
+								</label>
+							</td>
+							<td>
+								{if condition="check_auth('delete')"}
+								<button type="button" class="btn btn-sm btn-primary ebcms-do" url="{:url('delete')}" data-ids='{$vo.id}' confirm="删除后不可恢复，确定删除？"><span class="glyphicon glyphicon-remove"></span></button>
+								{/if}
+								{if condition="check_auth('edit')"}
+								<a href="{:url('edit',['id'=>$vo['id']])}" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-pencil"></span></a>
+								{/if}
+								<a href="{$vo.url}" target="_blank" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-share-alt"></span></a>
+							</td>
+							<td>
+								{if condition="check_auth('style')"}
+								<div class="btn-group btn-group-sm dropup">
+									<button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										<span class="glyphicon glyphicon-bold"></span>
+									</button>
+									<div class="dropdown-menu" style="padding:5px;">
+										<div class="btn-group" style="display: inline-flex;" role="group" aria-label="...">
+											<button type="button" class="btn btn-primary ebcms-do" url="{:url('style')}" data-id='{$vo.id}' data-bold='0'>普通</button>
+											<button type="button" class="btn btn-primary ebcms-do" url="{:url('style')}" data-id='{$vo.id}' data-bold='600'>加粗</button>
+											<button type="button" class="btn btn-primary ebcms-do" url="{:url('style')}" data-id='{$vo.id}' data-bold='900'>特粗</button>
+										</div>
+									</div>
+								</div>
+								<div class="btn-group btn-group-sm dropup">
+									<button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										<span class="glyphicon glyphicon-tint"></span>
+									</button>
+									<div class="dropdown-menu" style="padding:5px;">
+										<div class="btn-group" style="display: inline-flex;" role="group" aria-label="...">
+											<button type="button" class="btn btn-default ebcms-do" url="{:url('style')}" data-id='{$vo.id}' data-color=''>无</button>
+											<button type="button" class="btn btn-primary ebcms-do" url="{:url('style')}" data-id='{$vo.id}' data-color='#428bca'>蓝</button>
+											<button type="button" class="btn btn-success ebcms-do" url="{:url('style')}" data-id='{$vo.id}' data-color='#5cb85c'>绿</button>
+											<button type="button" class="btn btn-info ebcms-do" url="{:url('style')}" data-id='{$vo.id}' data-color='#5bc0de'>青</button>
+											<button type="button" class="btn btn-warning ebcms-do" url="{:url('style')}" data-id='{$vo.id}' data-color='#f0ad4e'>黄</button>
+											<button type="button" class="btn btn-danger ebcms-do" url="{:url('style')}" data-id='{$vo.id}' data-color='#d9534f'>红</button>
+										</div>
+									</div>
+								</div>
+								{/if}
+							</td>
+							<td>
+								{if condition="check_auth('status')"}
+									{switch name='vo.status'}
+										{case value='99'}
+											<div class="btn-group">
+												<button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown">
+													<span class="glyphicon glyphicon-question-sign"></span>
+												</button>
+												<ul class="dropdown-menu" role="menu">
+													<li><a href="javascript:void(0);" class="ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='1'>通过</a></li>
+													<li><a href="javascript:void(0);" class="ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='0'>不通过</a></li>
+												</ul>
+											</div>
+										{/case}
+										{case value='1'}
+											<button type="button" class="btn btn-primary btn-sm ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='0'><span class="glyphicon glyphicon-ok-sign"></span></button>
+										{/case}
+										{default/}
+											<button type="button" class="btn btn-warning btn-sm ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='1'><span class="glyphicon glyphicon-ban-circle"></span></button>
+									{/switch}
+								{/if}
+							</td>
+							<td>
+								{neq name='vo.thumb' value=''}
+								<span class="ebcms-thumb glyphicon glyphicon-picture" style="color: red;cursor: pointer;" data-src="{$vo.thumb|thumb}"></span>
+								{/neq}
+								<a href="{:url('edit',['id'=>$vo['id']])}" style="{$vo.style}">{$vo.title}</a>
+							</td>
+							<td style="cursor: pointer;" class="ebcms-attr" data-id="{$vo.id}">
+								{foreach name='vo.attr' item='v'}
+								<span class="text-danger">{$v.attr}</span>
+								{/foreach}
+							</td>
+							<td>
+								<span>{$vo.click}</span>
+							</td>
+							<td>{$vo.create_time|date='Y-m-d H:i:s',###}</td>
+						</tr>
+						{/foreach}
+					</tbody>
+					<tfoot>
+						<tr>
+							<td style="cursor: pointer;" onclick="$('input.ebcms-id').trigger('click');">
+								<span class="glyphicon glyphicon-check"></span> 选择
+							</td>
+							<td colspan="7">
+								<button onclick="$(this).data('ids',EBCMS.FN.getCheckedId('input.ebcms-id:checkbox:checked'));" type="button" class="btn btn-danger btn-sm ebcms-do" url="{:url('delete')}" confirm="确定批量删除？">删除</button>
+								<button onclick="$(this).attr('url','{:url('move')}?ids='+EBCMS.FN.getCheckedId('input.ebcms-id:checkbox:checked'));" type="button" class="btn btn-danger btn-sm ebcms-go">移动</button>
+								<button onclick="$(this).data('ids',EBCMS.FN.getCheckedId('input.ebcms-id:checkbox:checked'));" type="button" class="btn btn-danger btn-sm ebcms-do" url="{:url('status')}" data-value="1" confirm="确定批量显示？">显示</button>
+								<button onclick="$(this).data('ids',EBCMS.FN.getCheckedId('input.ebcms-id:checkbox:checked'));" type="button" class="btn btn-danger btn-sm ebcms-do" url="{:url('status')}" data-value="0" confirm="确定批量隐藏？">隐藏</button>
+							</td>
+						</tr>
+					</tfoot>
+				</table>
+			</div>
+			{$data -> render()}
+		</div>
+	</div>
+</div>
+{include file='ebcms@common/footer' /}

@@ -1,0 +1,123 @@
+{include file='ebcms@common/header' /}
+{php}
+	$default_attr = \ebcms\Config::get('content.attr');
+	$where = [];
+	if(input('attr')){
+		$where = [
+			'attr' => input('attr'),
+		];
+	}
+	$data = \app\content\model\Attr::with('content') -> where($where) -> order('sort desc,content_id desc') -> select();
+{/php}
+<script>
+	var M = {};
+	$(function() {
+		$('.ebcms-thumb').hover(function() {
+			if ($(window).height() - ($(this).offset().top - $(document).scrollTop()) > 248) {
+				var top = $(this).offset().top + $(this).height() - $(document).scrollTop();
+			}else{
+				var top = $(this).offset().top - $(document).scrollTop() - 248;
+			}
+			M.thumb = EBCMS.MSG.dialog({
+				title:'图片预览',
+				padding:0,
+				lock: false,
+				fixed: false,
+				drag: false,
+				left: $(this).offset().left+$(this).width(),
+				top: top,
+				content: '<img src="'+$(this).data('src')+'" alt="" style="height:200px;" />',
+			}).show();
+		}, function() {
+			M.thumb.hide();
+		});
+	});
+</script>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+			<h3>
+				<span>属性管理</span>
+			</h3>
+			<p>
+				{php}
+					$attrs = \think\Db::name('content_attr') -> group('attr') -> column('attr');
+				{/php}
+				{foreach name='attrs' item='vo'}
+					<a href="{:url('index',['attr'=>$vo])}" class="btn btn-sm {eq name='Request.param.attr' value='$vo'}btn-danger active{else/}btn-primary{/eq}">{$vo}</a>
+				{/foreach}
+			</p>
+			{if condition="input('attr')"}
+				<div class="table-responsive">
+					<table class="table table-bordered table-hover table-ebcms">
+						<tbody>
+							<tr>
+								<th style="width: 80px;">选择</th>
+								<th style="width: 80px;">排序</th>
+								<th>标题</th>
+								<th style="width: 50px;">状态</th>
+								<th>浏览量</th>
+								<th>创建时间</th>
+							</tr>
+							{foreach name='data' item='vo'}
+							{php}
+								$content = $vo['content'];
+							{/php}
+							<tr>
+								<td>
+									<label>
+										<input type="checkbox" name="id" class="ebcms-id" value="{$vo.attr}_{$vo.content_id}">
+										{$vo.content_id}
+									</label>
+								</td>
+								<td>
+									<input value="{$vo.sort}" class="form-control input-sm ebcms-change" url="{:url('resort')}" data-content_id="{$vo.content_id}" data-attr="{$vo.attr}">
+								</td>
+								<td>
+									{neq name='content.thumb' value=''}
+									<span class="ebcms-thumb glyphicon glyphicon-picture" style="color: red;cursor: pointer;" data-src="{$content.thumb|thumb}"></span>
+									{/neq}
+									<a href="{$content.url}" target="_blank">{$content.title}</a>
+								</td>
+								<td>
+									{switch name='content.status'}
+										{case value='99'}
+											<span class="glyphicon glyphicon-question-sign text-warning" title="待审"></span>
+										{/case}
+										{case value='1'}
+											<span class="glyphicon glyphicon-ok-sign text-primary" title="正常"></span>
+										{/case}
+										{default/}
+											<span class="glyphicon glyphicon-ban-circle text-danger" title="隐藏"></span>
+									{/switch}
+								</td>
+								<td>
+									<span>{$content.click}</span>
+								</td>
+								<td>{$content.create_time|date='Y-m-d H:i:s',###}</td>
+							</tr>
+							{/foreach}
+						</tbody>
+						<tfoot>
+							<tr>
+								<td style="cursor: pointer;" onclick="$('input.ebcms-id').trigger('click');">
+									<span class="glyphicon glyphicon-check"></span> 选择
+								</td>
+								<td colspan="7">
+									<button onclick="$(this).data('attr',EBCMS.FN.getCheckedId('input.ebcms-id:checkbox:checked'));" type="button" class="btn btn-danger btn-sm ebcms-do" url="{:url('remove')}" confirm="移除并不会删除内容，移除吗？">移除</button>
+									<span class="text-danger">建议定期将过久的内容从属性中移除出去以提升前台性能！</span>
+								</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+			{else/}
+				<div class="alert alert-danger">
+					<p>请选择属性以管理数据！</p>
+					<p>建议定期将过久的内容从属性中移除出去以提升前台性能！</p>
+				</div>
+			{/if}
+		</div>
+	</div>
+</div>
+{include file='ebcms@common/footer' /}

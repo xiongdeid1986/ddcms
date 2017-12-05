@@ -1,0 +1,48 @@
+{include file='index@common/header' /}
+<div class="row">
+    <div class="col-md-3">
+        {include file='common/side' /}
+    </div>
+    <div class="col-md-9">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h1 class="text-center">搜索</h1>
+                <hr>
+                <form class="form-horizontal well" method="get" action="{:url('content/search/index')}">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" value="{$q}" placeholder="Search for...">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="submit">搜索</button>
+                        </span>
+                    </div>
+                </form>
+                {notempty name='q'}
+                    <hr>
+                    {php}
+                        $where = [
+                            'status' => 1,
+                            'title|keywords|description' => ['like', '%' . $q . '%']
+                        ];
+                        $lists = \app\content\model\Content::where($where) -> cache(60) -> paginate(5, false, ['query' => ['q' => $q]]);
+                    {/php}
+                    {notempty name='lists'}
+                        <div class="list-group">
+                            {foreach name='lists' item='vo'}
+                            <div class="list-group-item">
+                                <a href="{$vo.url}">
+                                    <h3>{:str_replace([$q],['<span style="color:red;font-weight: bolder;">'.$q.'</span>'],$vo['shorttitle'])}</h3>
+                                </a>
+                                <p>{:str_replace([$q],['<span style="color:red;font-weight: bolder;">'.$q.'</span>'],$vo['description'])}</p>
+                            </div>
+                            {/foreach}
+                        </div>
+                        {$lists -> render()}
+                    {else/}
+                        <div class="alert alert-danger">没有搜索到与 "<b class="text-danger"> {$q} </b>" 相关的结果</div>
+                    {/notempty}
+                {/notempty}
+            </div>
+        </div>
+    </div>
+</div>
+{include file='index@common/footer' /}

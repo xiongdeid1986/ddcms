@@ -1,0 +1,23 @@
+{include file='index@common/header'/}
+	<div class="row">
+		<div class="col-md-12">
+			<div class="jumbotron">
+				<h1>评论使用方法</h1>
+				<p>评论模块支持插入到任何页面，支持一个页面插入多个！</p>
+				<p>
+					<pre>{literal}{if condition="check_app('comment')"}
+	&lt;iframe src=&quot;{:url('comment/index/index',['group'=&gt;'评论分组','key'=&gt;'页面标识','size'=&gt;分页大小,'type'=&gt;展示类型])}&quot;
+	 frameborder=&quot;0&quot; width=&quot;100%&quot; scrolling=no height=&quot;auto&quot; frameBorder=0&gt;&lt;/iframe&gt;
+{/if}{/literal}</pre>
+				</p>
+				<p><b>评论分组</b>：可以不填，例如内容模块，可以填写<code>content</code>，作用仅仅是将评论分组，方便以后查询。</p>
+				<p><b>页面标识</b>：当前页面的唯一标识，例如文章内容推荐使用<code>content_文章id</code></p>
+				<p><b>分页大小</b>：默认10</p>
+				<p><b>展示类型</b>：分页展示：1 下拉加载：2</p>
+			</div>
+		</div>
+		<div class="col-md-12">
+			{include file='index/comment1'/}
+		</div>
+	</div>
+{include file='index@common/footer'/}

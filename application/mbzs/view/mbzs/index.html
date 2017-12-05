@@ -1,0 +1,82 @@
+{include file='ebcms@common/header' /}
+<div class="col-md-12">
+    <h3>
+        <span>模板助手</span>
+        <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown">
+            添加 <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li><a href="{:url('add',['form'=>'multitextbox','group'=>'默认分组'])}">文本</a></li>
+                <li><a href="{:url('add',['form'=>'ueditor','group'=>'默认分组'])}">编辑器</a></li>
+                <li><a href="{:url('add',['form'=>'upload','group'=>'默认分组'])}">上传</a></li>
+                <li><a href="{:url('add',['form'=>'tpl','group'=>'默认分组'])}">模板</a></li>
+            </ul>
+        </div>
+    </h3>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover table-ebcms">
+            <tbody>
+                <tr>
+                    <th style="width:80px;">排序</th>
+                    <th style="width:170px;">操作</th>
+                    <th style="width:150px;">标题</th>
+                    <th style="width:150px;">键</th>
+                    <th>调用</th>
+                </tr>
+                {php}
+                    $data = \app\mbzs\model\Mbzs::order('sort desc,id asc') -> select();
+                    $data = \ebcms\Tree::group($data);
+                {/php}
+                {foreach name='data' item='items' key='group'}
+                    <tr>
+                        <th>{$group}</th>
+                        <th colspan="4">
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown">
+                                添加 <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a href="{:url('add',['form'=>'multitextbox','group'=>$group])}">文本</a></li>
+                                    <li><a href="{:url('add',['form'=>'ueditor','group'=>$group])}">编辑器</a></li>
+                                    <li><a href="{:url('add',['form'=>'upload','group'=>$group])}">上传</a></li>
+                                    <li><a href="{:url('add',['form'=>'tpl','group'=>$group])}">模板</a></li>
+                                </ul>
+                            </div>
+                        </th>
+                    </tr>
+                    {foreach name='items' item='vo'}
+                        <tr>
+                            <td>
+                                <input value="{$vo.sort}" class="form-control input-sm ebcms-change" url="{:url('resort')}" data-id="{$vo.id}">
+                            </td>
+                            <td>
+                                {if condition="check_auth('status')"}
+                                {switch name="vo.status" }
+                                    {case value="1"}
+                                        <button type="button" class="btn btn-primary btn-sm ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='0'>正常</button>
+                                    {/case}
+                                    {default /}
+                                        <button type="button" class="btn btn-warning btn-sm ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='1'>停用</button>
+                                {/switch}
+                                {/if}
+                                {if condition="check_auth('edit')"}
+                                    <a href="{:url('edit?id='.$vo['id'])}" class="btn btn-primary btn-sm">编辑</a>
+                                {/if}
+                                {if condition="check_auth('delete')"}
+                                    <button type="button" class="btn btn-primary btn-sm ebcms-do" url="{:url('delete')}" data-ids='{$vo.id}' confirm="删除后不可恢复，确定删除？">删除</button>
+                                {/if}
+                            </td>
+                            <td>{$vo.title}</td>
+                            <td>{$vo.name}</td>
+                            <td>
+                                <input type="text" class="form-control" style="min-width: 200px;" value="{literal}{if condition=&quot;check_app('mbzs')&quot;}{:\\app\\mbzs\\Zs::get('{/literal}{$vo.name}','{$vo.title}{literal}')}{/if}{/literal}" onfocus="javascript:this.select();">
+                            </td>
+                        </tr>
+                    {/foreach}
+                {/foreach}
+            </tbody>
+        </table>
+    </div>
+</div>
+{include file='ebcms@common/footer' /}

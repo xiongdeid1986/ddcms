@@ -1,0 +1,142 @@
+
+    </div>
+    <section class="block-bottom">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 col-ms-12">
+                    <img src="/assets/images/logo-pink.png" class="logo" alt="Stargym" />
+                </div>
+                <div class="col-lg-2 col-md-2 hidden-sm hidden-xs hidden-ms">
+                    <h5>Trainings</h5>
+                </div>
+                <div class="col-lg-3 col-md-3 hidden-sm hidden-xs hidden-ms">
+                    <h5>Contact us</h5>
+                </div>
+                <div class="col-lg-3 col-md-3 hidden-sm hidden-xs hidden-ms">
+                    <h5>Gallery</h5>
+                </div>
+                <div class="col-lg-4 col-md-4 col-ms-6 block-contacts border-right">
+                    <p>Quisque quis dignissim elit. Aliquam et augue aliquet orci maximus convallis id vitae augue. Phasellus elementum commodo aliquet. Sed vitae sem in arcu auctor pharetra vel ut erat.</p>
+                    <ul class="address">
+                        {if condition="$site.address"}
+                        <li><span class="fa fa-map-marker"></span>{$site.address}</li>
+                        {/if}
+                        {if condition="$site.contact"}
+                        <li><span class="fa fa-user"></span>{$site.contact}</li>
+                        {/if}
+                        {if condition="$site.phone"}
+                        <li><span class="fa fa-mobile-phone"></span><a href="tel:{$site.phone}">{$site.phone}</a></li>
+                        {/if}
+                        {if condition="$site.fixed_phone"}
+                        <li><span class="fa fa-fax"></span><a href="tel:{$site.phone}">{$site.fixed_phone}</a></li>
+                        {/if}
+                        {if condition="$site.qq"}
+                        <li><span class="fa fa-qq"></span><a target="_blank" href="tencent://message/?uin={$site.qq}&Site=QQ交谈&Menu=yes">{$site.qq}</a></li>
+                        {/if}
+                        {if condition="$site.weixin"}
+                        <li><span class="fa fa-weixin"></span>{$site.weixin}</li>
+                        {/if}
+                        {if condition="$site.weibo"}
+                        <li><span class="fa fa-weibo"></span><a href="http://{$site.weibo}">{$site.weibo}</a></li>
+                        {/if}
+                        {if condition="$site.weixin_public_code"}
+                        <li><span class="fa fa-qrcode"></span><img style="width: 50%;" src="{$site.weixin_public_code}" /></li>
+                        {/if}
+                        {if condition="$site.weixin_code"}
+                        <li><span class="fa fa-qrcode"></span><img style="width: 50%;" src="{$site.weixin_code}" /></li>
+                        {/if}
+                        {if condition="$site.mail"}
+                        <li><span class="fa  fa-envelope-square"></span><a href="mailto:{$site.mail}">{$site.mail}</a></li>
+                        {/if}
+                    </ul>
+                    <ul class="social social-big">
+                        {if condition="$site.weibo"}
+                        <li><a href="http://{$site.weibo}" target="_blank" class="social-fb fa fa-weibo"></a></li>
+                        {/if}
+                        {if condition="$site.qq"}
+                        <li><a href="tencent://message/?uin={$site.qq}&Site=QQ交谈&Menu=yes" class="social-fb fa fa-qq"></a></li>
+                        {/if}
+                        {if condition="$site.phone"}
+                        <li><a href="tel:{$site.phone}" class="social-fb fa fa-mobile-phone"></a></li>
+                        {/if}
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-2 col-ms-6 menu-footer border-right">
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-xs-6 col-ms-6">
+                            <h5 class="hidden-md hidden-lg">Trainings</h5>
+                            <ul>
+                                <li><a href="coming.html">Gym Training</a></li>
+                                <li><a href="coming.html">Crossfit</a></li>
+                                <li><a href="coming.html">Cardio</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-xs-6 col-ms-6">
+                            <h5>Stargym</h5>
+                            <ul>
+                                <li><a href="about.html">About</a></li>
+                                <li><a href="coming.html">Trainings</a></li>
+                                <li><a href="coming.html">Coaches</a></li>
+                                <li><a href="cards.html">Club cards</a></li>
+                                <li><a href="blog.html">Blog</a></li>
+                                <li><a href="contact.html">Contact</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-12 col-ms-12 border-right">
+                    <h5 class="hidden-md hidden-lg">Contact us</h5>
+                    <form>
+                        <input type="text" name="name" placeholder="Your name" />
+                        <input type="text" name="email" placeholder="E-mail" />
+                        <textarea name="text" placeholder="Text"></textarea>
+                        <input type="submit" name="send" value="Send" class="btn btn-pink btn-black-bg" />
+                    </form>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-12 col-ms-12">
+                    <h5 class="hidden-md hidden-lg">Gallery</h5>
+                    <div class="gallery clearfix">
+                        <a href="#"><img src="/assets/images/_footer-photo-1.png" alt="Gallery" /></a>
+                        <a href="#"><img src="/assets/images/_footer-photo-2.png" alt="Gallery" /></a>
+                        <a href="#"><img src="/assets/images/_footer-photo-3.png" alt="Gallery" /></a>
+                        <a href="#"><img src="/assets/images/_footer-photo-4.png" alt="Gallery" /></a>
+                        <a href="#"><img src="/assets/images/_footer-photo-5.png" alt="Gallery" /></a>
+                        <a href="#"><img src="/assets/images/_footer-photo-6.png" alt="Gallery" /></a>
+                    </div>
+                    <div class="tags clearfix">
+                        <a href="#">#gym</a>
+                        <a href="#">#fitness</a>
+                        <a href="#">#sports</a>
+                        <a href="#">#nutrition</a>
+                        <a href="#">#trainings</a>
+                        <a href="#">#food</a>
+                        <a href="#">#bodybuilding</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer>
+        <div class="container">
+            <a href="http://{$site.url}">{$site.company_name}</a> &copy; All Rights Reserved – 版权所有 
+            <a href="http://ddweb.com.cn" target="_blank">技术支持(ddweb.com.cn)</a>
+            <a href="#" class="go-top fa fa-arrow-up hidden-xs hidden-ms"><span>回到顶部</span></a>
+        </div>
+    </footer>
+    <script type="text/javascript" src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/jquery-ui.js"></script>
+    <script type="text/javascript" src="/assets/js/jquery.parallax-1.1.3.js"></script>
+    <script type="text/javascript" src="/assets/js/jquery.localscroll-1.2.7-min.js"></script>
+    <script type="text/javascript" src="/assets/js/jquery.scrollTo-1.4.2-min.js"></script>
+    <script type="text/javascript" src="/assets/js/collapse.js"></script>
+    <script type="text/javascript" src="/assets/js/scrollreveal.js"></script>
+    <script type="text/javascript" src="/assets/js/countUp.js"></script>
+    <script type="text/javascript" src="/assets/js/swiper.jquery.js"></script>
+    <script type="text/javascript" src="/assets/js/jquery.matchHeight.js"></script>
+    <script type="text/javascript" src="/assets/js/jquery.swipebox.js"></script>
+    <script type="text/javascript" src="/assets/js/masonry.pkgd.min.js"></script>
+    <script type="text/javascript" src="/assets/js/jquery.zoomslider.js"></script>
+    <script src="/assets/js/map-pink.js"></script>
+    <script type="text/javascript" src="/assets/js/scripts.js"></script>
+</body>
+</html>

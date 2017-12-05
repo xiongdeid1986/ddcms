@@ -1,0 +1,101 @@
+{include file='ebcms@common/header' /}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h3>
+                <span>论坛管理</span>
+                <a href="{:url('add')}"><span class="glyphicon glyphicon-plus"></span></a>
+            </h3>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-ebcms">
+                    <tbody>
+                        <tr>
+                            <th style="width:70px;">ID</th>
+                            <th style="width:80px;">排序</th>
+                            <th>板块</th>
+                            <th style="width:120px;">操作</th>
+                            <th style="width:120px;">权限设置</th>
+                            <th style="width:80px;">状态</th>
+                            <th>版主</th>
+                        </tr>
+                        {php}
+                            $forums = \app\forum\model\Forum::with('moderator') -> order('sort desc,id asc') -> select();
+                            $forums = \ebcms\Tree::group($forums);
+                        {/php}
+                        {foreach name='forums' item='items' key="group"}
+                            <tr>
+                                <th colspan="2">{$group}</th>
+                                <td colspan="5"></td>
+                            </tr>
+                            {foreach name='items' item='vo'}
+                            <tr>
+                                <td>
+                                    <label>
+                                        <input type="checkbox" name="id" class="ebcms-id" value="{$vo.id}">
+                                        {$vo.id}
+                                    </label>
+                                </td>
+                                <td>
+                                    <input value="{$vo.sort}" class="form-control input-sm ebcms-change" url="{:url('resort')}" data-id="{$vo.id}">
+                                </td>
+                                <td>
+                                    <a href="{$vo.url}" target="_blank">{$vo.title}</a>
+                                </td>
+                                <td>
+                                    {if condition="check_auth('edit')"}
+                                    <a href="{:url('edit?id='.$vo['id'])}" class="btn btn-primary btn-sm">编辑</a>
+                                    {/if}
+                                    {if condition="check_auth('delete')"}
+                                    <button type="button" class="btn btn-primary btn-sm ebcms-do" url="{:url('delete')}" data-ids='{$vo.id}' confirm="删除后不可恢复，确定删除？">删除</button>
+                                    {/if}
+                                </td>
+                                <td>
+                                    {if condition="check_auth('open')"}
+                                        {eq name='vo.open' value='1'}
+                                        <button type="button" class="btn btn-primary btn-sm ebcms-do" url="{:url('open')}" data-ids='{$vo.id}' data-value='0' confirm="关闭后该板块只允许浏览，不允许发帖！">开启</button>
+                                        {else/}
+                                        <button type="button" class="btn btn-warning btn-sm ebcms-do" url="{:url('open')}" data-ids='{$vo.id}' data-value='1' confirm="开启后该板块允许浏览和发帖！">关闭</button>
+                                        {/eq}
+                                    {/if}
+                                    {if condition="check_auth('auth')"}
+                                        <a href="{:url('auth?id='.$vo['id'])}" class="btn btn-primary btn-sm">权限</a>
+                                    {/if}
+                                </td>
+                                <td>
+                                    {if condition="check_auth('status')"}
+                                        {eq name='vo.status' value='1'}
+                                        <button type="button" class="btn btn-primary btn-sm ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='0'>显示</button>
+                                        {else/}
+                                        <button type="button" class="btn btn-warning btn-sm ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='1'>隐藏</button>
+                                        {/eq}
+                                    {/if}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        {foreach name='vo.moderator' item='v'}
+                                            <button type="button" class="btn btn-primary ebcms-go" url="{:url('edit_moderator?id='.$v['pivot']['id'])}">{$v.nickname}</button>
+                                            <button type="button" class="btn btn-primary ebcms-do" url="{:url('delete_moderator')}" data-id="{$v.pivot.id}" confirm="确定删除该版主吗？">×</button>
+                                        {/foreach}
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-danger ebcms-go" url="{:url('add_moderator?forum_id='.$vo['id'])}">添加</button>
+                                </td>
+                            </tr>
+                            {/foreach}
+                        {/foreach}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td style="cursor: pointer;" onclick="$('input.ebcms-id').trigger('click');">
+                                <span class="glyphicon glyphicon-check"></span> 选择
+                            </td>
+                            <td colspan="6">
+                                <button onclick="$(this).attr('url','{:url('merge')}?ids='+EBCMS.FN.getCheckedId('input.ebcms-id:checkbox:checked'));" type="button" class="btn btn-danger btn-sm ebcms-go">合并</button>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{include file='ebcms@common/footer' /}

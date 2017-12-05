@@ -1,0 +1,206 @@
+{include file='common/header' /}
+<div class="row">
+	<div class="col-md-2">
+		{include file='common/left' /}
+	</div>
+	<div class="col-md-10">
+		<table class="table table-bordered" style="table-layout: fixed;">
+			<tr>
+				<td class="active" style="width:8.4em;vertical-align: middle;text-align: center;">
+					<b>统计 <span class="text-danger">{$thread.rethreads}</span> / <span class="text-danger">{$thread.views}</span></b>
+				</td>
+				<td class="active" style="vertical-align: middle;">
+					<h1 style="font-size: 1.3em;margin: 5px;">
+						<!-- 论坛 -->
+						<a href="{$forum.url}" class="text-muted">[{$forum.title}]</a>
+						<!-- 帖子标题 -->
+						<a href="{$thread.url}"><strong>{$thread.title}</strong></a>
+					</h1>
+				</td>
+			</tr>
+			<tr>
+				<td class="active" style="vertical-align: center;">
+					<div class="text-center">
+					{notempty name='thread.user.id'}
+						<a href="{$user.space_url}">
+							<img src="{$user.avatar|thumb}" class="img-responsive" alt="...">
+						</a>
+						<hr style="margin:15px 0;">
+						<p>
+							<span class="badge text-overflow">{$user.nickname}</span>
+						</p>
+						<p>
+							<span>{$user.grade_title}</span>
+						</p>
+					{else}
+						<img src="__ROOT__/system/image/avatar.gif" class="img-responsive" alt="...">
+						<hr style="margin:15px 0;">
+						<p class="text-center">
+							<span class="badge">游客</span>
+						</p>
+						<p class="text-center">
+							<span>IP：{$thread.ip}</span>
+						</p>
+					{/notempty}
+					</div>
+				</td>
+				<td>
+					<div class="text-muted" style="font-size: .9em;border-bottom: 1px dashed #ddd;margin-bottom: 10px;padding-bottom: 5px;">
+						<span class="text-right pull-right">楼主</span>
+						<span>发布时间：{$thread.create_time|date='Y-m-d H:i:s',###} IP：{$thread.ip}</span>
+						<!-- 审核 -->
+						{if condition="moderator_auth($thread['forum_id'],'status')"}
+							{switch name="thread.status"}
+								{case value="99"}
+									<a href="{$thread.status_url}?status=1">通过</a>
+									<a href="{$thread.status_url}?status=0">屏蔽</a>
+								{/case}
+								{case value="0"}
+									<a href="{$thread.status_url}?status=1">通过</a>
+								{/case}
+								{default /}
+									<a href="{$thread.status_url}?status=0">屏蔽</a>
+							{/switch}
+						{/if}
+						<!-- 编辑 -->
+						{if condition="$thread['edit_able'] || moderator_auth($thread['forum_id'],'edit')"}
+							<a href="{$thread.edit_url}">编辑</a>
+						{/if}
+						<!-- 删除 -->
+						{if condition="$thread['delete_able'] || moderator_auth($thread['forum_id'],'delete')"}
+							<a href="{$thread.delete_url}" onclick="return confirm('删除吗？');">删除</a>
+						{/if}
+						<!-- 加精 -->
+						{if condition="moderator_auth($thread['forum_id'],'best')"}
+							{for start="1" end="4"}
+								{eq name='thread.best' value='$i'}
+									<a href="{$thread.best_url}?best=0" class="text-danger">加精{$i}</a>
+								{else/}
+									<a href="{$thread.best_url}?best={$i}">加精{$i}</a>
+								{/eq}
+							{/for}
+						{/if}
+						<!-- 置顶 -->
+						{if condition="moderator_auth($thread['forum_id'],'top1')"}
+							{eq name='thread.top' value='1'}
+								<a href="{$thread.top_url}?top=0" class="text-danger">置顶</a>
+							{else/}
+								<a href="{$thread.top_url}?top=1">置顶</a>
+							{/eq}
+						{/if}
+						<!-- 全局置顶 -->
+						{if condition="moderator_auth($thread['forum_id'],'top2')"}
+							{eq name='thread.top' value='2'}
+								<a href="{$thread.top_url}?top=0" class="text-danger">全局置顶</a>
+							{else/}
+								<a href="{$thread.top_url}?top=2">全局置顶</a>
+							{/eq}
+						{/if}
+					</div>
+					<div class="desc" style="min-height: 120px;padding: 10px;word-break: break-all;font-size: 1.2em;">
+						{switch name="thread.status"}
+							{case value="99"}
+								<div class="bg-info" style="padding: 5px;margin-bottom: 10px;">等待审核中...</div>
+							{/case}
+							{case value="0"}
+								<div class="bg-warning" style="padding: 5px;margin-bottom: 10px;">未通过审核...</div>
+							{/case}
+							{default /}
+						{/switch}
+						{$thread.body.detail|htmlspecialchars_decode}
+					</div>
+				</td>
+			</tr>
+			{php}
+				$lists = \app\forum\model\Rethread::with('user') -> where(['thread_id'=>$thread['id']]) -> order('id asc') -> paginate(10, false, [
+					'query' => input('get.')
+				]);
+			{/php}
+			{foreach name='lists' item='vo'}
+			<tr id="rethread_{$vo.id}">
+				<td class="active">
+					<div class="text-center">
+						{notempty name='vo.user.id'}
+							<a href="{$vo.user.space_url}">
+								<img src="{$vo.user.avatar|thumb}" class="img-responsive" alt="...">
+							</a>
+							<hr style="margin:15px 0;">
+							<p>
+								<span class="badge text-overflow">{$vo.user.nickname}</span>
+							</p>
+							<p>
+								<span>{$vo.user.grade_title}</span>
+							</p>
+						{else}
+							<img src="__ROOT__/system/image/avatar.gif" class="img-responsive" alt="...">
+							<hr style="margin:15px 0;">
+							<p class="text-center">
+								<span class="badge">游客</span>
+							</p>
+							<p class="text-center">
+								<span>IP：{$vo.ip}</span>
+							</p>
+						{/notempty}
+					</div>
+				</td>
+				<td>
+					{php}
+						$f = $key - 9 + input('page',1)*10;
+					{/php}
+					<div class="text-muted" style="font-size: .9em;border-bottom: 1px dashed #ddd;margin-bottom: 10px;padding-bottom: 5px;">
+						<span class="text-right pull-right"># {$f}</span>
+						<span>发布时间：{$vo.create_time|date='Y-m-d H:i:s',###}</span>
+						<span>IP：{$vo.ip}</span>
+						<!-- 审核 -->
+						{if condition="moderator_auth($thread['forum_id'],'status')"}
+							{switch name="vo.status"}
+								{case value="99"}
+									<a href="{$vo.status_url}?status=1">通过</a>
+									<a href="{$vo.status_url}?status=0">屏蔽</a>
+								{/case}
+								{case value="0"}
+									<a href="{$vo.status_url}?status=1">通过</a>
+								{/case}
+								{default /}
+									<a href="{$vo.status_url}?status=0">屏蔽</a>
+							{/switch}
+						{/if}
+						<!-- 编辑 -->
+						{if condition="$vo['edit_able'] || moderator_auth($thread['forum_id'],'edit')"}
+							<a href="{$vo.edit_url}">编辑</a>
+						{/if}
+						<!-- 删除 -->
+						{if condition="$vo['delete_able'] || moderator_auth($thread['forum_id'],'delete')"}
+							<a href="{$vo.delete_url}" onclick="return confirm('删除吗？');">删除</a>
+						{/if}
+					</div>
+					<div style="min-height: 120px;word-break: break-all;font-size: 1.2em;">
+						{eq name='vo.status' value='1'}
+							{$vo.content|htmlspecialchars_decode}
+						{else/}
+							{switch name="vo.status"}
+								{case value="99"}
+									<div class="bg-info" style="padding: 5px;margin-bottom: 10px;">等待审核中...</div>
+								{/case}
+								{default /}
+									<div class="bg-warning" style="padding: 5px;margin-bottom: 10px;">未通过审核...</div>
+							{/switch}
+							{if condition="is_me($vo['user_id']) || moderator_auth($thread['forum_id'])"}
+								{$vo.content|htmlspecialchars_decode}
+							{/if}
+						{/eq}
+					</div>
+					<div>
+						{if condition="check_app('comment')"}
+							<iframe src="{:url('comment/index/index',['group'=>'forum','key'=>'forum_rethread_'.$vo['id'],'size'=>5,'type'=>3])}" frameborder="0" width="100%" scrolling=no height="auto" frameBorder=0></iframe>
+						{/if}
+					</div>
+				</td>
+			</tr>
+			{/foreach}
+			{include file='thread/rethread' /}
+		</table>
+		{$lists -> render()}
+	</div>
+</div>
+{include file='common/footer' /}

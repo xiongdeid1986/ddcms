@@ -1,0 +1,180 @@
+<tr>
+	{if condition="auth($forum,40)"}
+		<td>
+			<div class="text-center">
+				{if condition='is_login()'}
+					<a href="{:url('user/space/index',['id'=>session('user_id')])}">
+						<img src="{:thumb(user('avatar'))}" class="img-responsive" alt="...">
+					</a>
+					<hr style="margin:15px 0;">
+					<p class="text-center">
+						<span class="badge text-overflow">{:user('nickname')}</span>
+					</p>
+				{else/}
+					<img src="__ROOT__/system/image/avatar.gif" class="img-responsive" alt="...">
+					<hr style="margin:15px 0;">
+					<p class="text-center">
+						<span class="badge">游客</span>
+					</p>
+					<p class="text-center">
+						<span>{$Request.ip}</span>
+					</p>
+				{/if}
+			</div>
+		</td>
+		<td>
+			<form id="rethread_form" action="{:url('forum/rethread/index')}" method="post" onsubmit="return M.rethread();">
+				<div class="form-group">
+					<textarea class="form-control" id="content" name="content" rows="7"></textarea>
+					<p class="help-block">请遵守当地法律法规！</p>
+				</div>
+				<script type="text/javascript">
+					var M = {};
+					$(function() {
+						M.initEditor = function()
+						{
+							M.loadJS("__ROOT__/third/xheditor/xheditor-1.2.2.min.js",function(){
+								M.loadJS('__ROOT__/third/xheditor/xheditor_lang/zh-cn.js');
+								$('#content').xheditor({
+									height:300,
+									loadCSS:'//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css',
+									upMultiple:true,
+									upLinkUrl:"{:url('forum/api/xhupload')}",
+									upLinkExt:"zip,rar,txt",
+									upImgUrl:"{:url('forum/api/xhupload')}",
+									upImgExt:"jpg,jpeg,gif,png",
+									upFlashUrl:"{:url('forum/api/xhupload')}",
+									upFlashExt:"swf",
+									upMediaUrl:"{:url('forum/api/xhupload')}",
+									upMediaExt:"avi"
+								});
+								$('#initEditor').hide();
+								$('#is_edit').val(1);
+							});
+						};
+						M.loadJS = function(url,callback,charset)
+						{
+							var script = document.createElement('script');
+							script.onload = script.onreadystatechange = function ()
+							{
+								if (script && script.readyState && /^(?!(?:loaded|complete)$)/.test(script.readyState)) return;
+								script.onload = script.onreadystatechange = null;
+								script.src = '';
+								script.parentNode.removeChild(script);
+								script = null;
+								if(callback)callback();
+							};
+							script.charset=charset || document.charset || document.characterSet;
+							script.src = url;
+							try {document.getElementsByTagName("head")[0].appendChild(script);} catch (e) {}
+						};
+					});
+				</script>
+
+				{if condition="!auth($forum,42)"}
+				<div class="form-group" id="captcha_container">
+					<input type="text" name="captcha" class="form-control" id="captcha" placeholder="请输入验证码">
+					<script>
+						var change_captcha = function(selecter){
+							var url = $(selecter).attr('src');
+							if (-1 != url.lastIndexOf('#')) {
+								url = url.substring(0, url.lastIndexOf('#'));
+							}
+							$(selecter).attr('src',url + "#" + Math.random());
+						}
+						$(function() {
+							$('#captcha').focus(function(event) {
+								if (!$('#captcha_img').length) {
+									$('#captcha').before('<img class="img-rounded img-captcha" width="200" id="captcha_img" onclick="change_captcha(\'#captcha_img\');" src="{:url('index/api/captcha')}" alt="验证码" title="点击更换验证码">')
+								}
+								$('#captcha_img').css({
+									top: $("#captcha").position().top-$('#captcha_img').height()-2,
+								});
+								$('#captcha_img').show();
+							});
+							$('#captcha_container').hover(function() {
+								$('#captcha_img').show();
+							}, function() {
+								$('#captcha_img').hide();
+							});
+						});
+					</script>
+				</div>
+				<style>
+					/*验证码*/
+					.img-captcha{
+						width: 200px;
+						display: none;
+						cursor: pointer;
+						padding: 0px;
+						position: absolute;
+						height: 50px;
+						top: -50px;
+						border:1px solid #ccc;
+						outline: 0;
+						-webkit-box-shadow: 0 5px 10px rgba(0,0,0,.3);
+						box-shadow: 0 5px 10px rgba(0,0,0,.3);
+					}
+				</style>
+				{/if}
+				<input type="hidden" name="thread_id" value="{$thread.id}">
+				<button type="submit" class="btn btn-primary">提交</button>
+				<input type="hidden" name="is_edit" id="is_edit" value="0">
+				<button type="button" class="btn btn-danger" onclick="M.initEditor();" id="initEditor">高级模式</button>
+			</form>
+		</td>
+		<script>
+			$(function(){
+				M.rethread = function(){
+					$.ajax({
+						url: '{:url('forum/rethread/add')}',
+						type: 'POST',
+						dataType: 'json',
+						data: $('#rethread_form').serialize(),
+						success:function(data){
+							if (data.code) {
+								// self.location=data.url;
+								location=location;
+							}else{
+								alert(data.msg);
+								change_captcha('#captcha_img');
+							}
+						}
+					});
+					return false;
+				};
+			});
+		</script>
+	{else/}
+		{if condition="is_login()"}
+		<td style="width:120px">
+			<a href="{:url('user/space/index',['id'=>session('user_id')])}">
+				<img class="img-responsive" src="{:thumb(user('avatar'))}" alt="...">
+			</a>
+			<p class="text-center"><span class="label label-danger">{:user('nickname')}</span></p>
+		</td>
+		<td>
+			<form>
+				<div class="form-group">
+					<textarea id="forum_thread_detail-detail" class="form-control" name="forum_thread_detail[detail]" rows="7" placeholder="您所在用户组无发帖权限！" disabled></textarea>
+					<p class="help-block">您所在用户组无发帖权限！</p>
+				</div>
+				<button class="btn btn-primary" disabled>提交</button>
+			</form>
+		</td>
+		{else/}
+		<td style="width:120px">
+			游客
+		</td>
+		<td>
+			<form>
+				<div class="form-group">
+					<textarea id="forum_thread_detail-detail" class="form-control" name="forum_thread_detail[detail]" rows="7" placeholder="请登录！" disabled></textarea>
+					<p class="help-block">请&nbsp;<a href="{:url('user/auth/login')}" class="text-danger"><b>登录</b></a>&nbsp;后发帖！</p>
+				</div>
+				<button class="btn btn-primary" disabled>提交</button>
+			</form>
+		</td>
+		{/if}
+	{/if}
+</tr>

@@ -1,0 +1,122 @@
+{include file='ebcms@common/header' /}
+<div class="col-md-12">
+    <h3>
+        <span>评论管理</span>
+        <a href="{:url('ebcms/config/setting?name=user')}"><span class="glyphicon glyphicon-cog"></span></a>
+    </h3>
+    <p>
+        <form class="form-inline" role="form" action="{:url('index')}" method="GET">
+            <div class="form-group">
+                <input type="text" name="q" value="{:trim(input('q'))}" class="form-control" id="q" placeholder="关键字">
+            </div>
+            <div class="form-group">
+                <select class="form-control" name="status">
+                    <option value="">不限</option>
+                    <option value="1" {eq name='Request.get.status' value='1'}selected{/eq}>显示</option>
+                    <option value="0" {eq name='Request.get.status' value='0'}selected{/eq}>隐藏</option>
+                    <option value="99" {eq name='Request.get.status' value='99'}selected{/eq}>待审</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-danger">搜索</button>
+        </form>
+    </p>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover table-ebcms">
+            <tbody>
+                <tr>
+                    <th style="width: 70px;">id</th>
+                    <th style="width: 90px;">操作</th>
+                    <th style="width: 50px;">状态</th>
+                    <th>内容</th>
+                    <th style="width: 80px;">分组</th>
+                    <th style="width: 80px;">KEY</th>
+                    <th style="width: 80px;">评论人</th>
+                    <th style="width: 80px;">被评论人</th>
+                    <th style="width: 160px;">评论时间</th>
+                    <th style="width: 125px;">IP</th>
+                </tr>
+                {php}
+                    $where = [];
+                    if(input('q')){
+                        $where['content|group|key'] = ['like','%'.trim(input('q')).'%'];
+                    }
+                    if(input('?status') && input('status')!=''){
+                        $where['status'] = input('status');
+                    }
+                    $data = \app\user\model\Comment::with('user,touser') -> where($where) -> order('id desc') -> paginate(10,false,['query'=>input('get.')]);
+                {/php}
+                {foreach name='data' item='vo'}
+                    <tr>
+                        <td>
+                            <label>
+                                <input type="checkbox" class="ebcms-id" name="id" value="{$vo.id}">
+                                {$vo.id}
+                            </label>
+                        </td>
+                        <td>
+                            {if condition="check_auth('delete')"}
+                                <button type="button" class="btn btn-sm btn-primary ebcms-do" url="{:url('delete')}" data-ids='{$vo.id}' confirm="删除后不可恢复，确定删除？"><span class="glyphicon glyphicon-remove"></span></button>
+                            {/if}
+                            {if condition="check_auth('edit')"}
+                                <a href="{:url('edit',['id'=>$vo['id']])}" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-pencil"></span></a>
+                            {/if}
+                        </td>
+                        <td>
+                            {if condition="check_auth('status')"}
+                                {switch name='vo.status'}
+                                    {case value='99'}
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown">
+                                                <span class="glyphicon glyphicon-question-sign"></span>
+                                            </button>
+                                            <ul class="dropdown-menu" role="menu">
+                                                <li><a href="javascript:void(0);" class="ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='1'>通过</a></li>
+                                                <li><a href="javascript:void(0);" class="ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='0'>不通过</a></li>
+                                            </ul>
+                                        </div>
+                                    {/case}
+                                    {case value='1'}
+                                        <button type="button" class="btn btn-primary btn-sm ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='0'><span class="glyphicon glyphicon-ok-sign"></span></button>
+                                    {/case}
+                                    {default/}
+                                        <button type="button" class="btn btn-warning btn-sm ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='1'><span class="glyphicon glyphicon-ban-circle"></span></button>
+                                {/switch}
+                            {/if}
+                        </td>
+                        <td>
+                            <div class="ebcms-overflow" title="{$vo.content}">{$vo.content}</div>
+                        </td>
+                        <td>
+                            <div class="ebcms-overflow" title="{$vo.group}">{$vo.group}</div>
+                        </td>
+                        <td>
+                            <div class="ebcms-overflow" title="{$vo.key}">{$vo.key}</div>
+                        </td>
+                        <td>
+                            <a href="{:url('user/admin.user/info?id='.$vo['user_id'])}">{$vo.user.nickname}</a>
+                        </td>
+                        <td>
+                            <a href="{:url('user/admin.user/info?id='.$vo['to_user_id'])}">{$vo.touser.nickname}</a>
+                        </td>
+                        <td>{$vo.create_time|date='Y-m-d H:i:s',###}</td>
+                        <td>{$vo.ip}</td>
+                    </tr>
+                {/foreach}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td style="cursor: pointer;" onclick="$('input.ebcms-id').trigger('click');">
+                        <span class="glyphicon glyphicon-check"></span> 选择
+                    </td>
+                    <td colspan="9">
+                        <button onclick="$(this).data('ids',EBCMS.FN.getCheckedId('input.ebcms-id:checkbox:checked'));" type="button" class="btn btn-danger btn-sm ebcms-do" url="{:url('delete')}" confirm="选中项全部删除？">删除</button>
+                        <button onclick="$(this).data('ids',EBCMS.FN.getCheckedId('input.ebcms-id:checkbox:checked'));" type="button" class="btn btn-danger btn-sm ebcms-do" url="{:url('status')}" data-value="0" confirm="选中项全部隐藏？">隐藏</button>
+                        <button onclick="$(this).data('ids',EBCMS.FN.getCheckedId('input.ebcms-id:checkbox:checked'));" type="button" class="btn btn-danger btn-sm ebcms-do" url="{:url('status')}" data-value="1" confirm="选中项全部显示？">显示</button>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    {$data -> render()}
+</div>
+{include file='ebcms@common/footer' /}

@@ -1,0 +1,41 @@
+<div class="panel panel-default">
+	{php}
+	$user = \app\user\model\User::get(\think\Session::get('user_id'));
+	{/php}
+	<div class="panel-body">
+		<h2><b>{$user.nickname}</b></h2>
+		<hr>
+		<div class="media">
+			<div class="media-left">
+				<a href="{:url('user/index/index')}">
+					<img class="media-object" src="{$user.avatar|thumb=80,80,3}" width="80" height="80" alt="...">
+				</a>
+			</div>
+			<div class="media-body">
+				{php}
+					$currency = \ebcms\Config::get('user.base.currency');
+				{/php}
+				{foreach name='currency' item='vo'}
+				<p>{$vo}：<b>{$user['currency'][$key]}</b></p>
+				{/foreach}
+			</div>
+		</div>
+		<hr>
+		<p>{$user.motto}</p>
+	</div>
+</div>
+{php}
+	$nav = new \app\ebcms\model\Nav();
+	$nav = $nav -> lists() -> where('group','用户中心') -> select();
+	$nav = \ebcms\Tree::tree($nav);
+{/php}
+{foreach name="nav" item="vo" }
+	<div class="panel panel-default">
+		<div class="panel-heading">{$vo.title}</div>
+		<div class="list-group">
+			{foreach name='vo.rows' item='sub'}
+			<a class="list-group-item" href="{$sub.url}" target="{$sub.target}">{$sub.title}</a>
+			{/foreach}
+		</div>
+	</div>
+{/foreach}

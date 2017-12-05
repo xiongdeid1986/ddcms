@@ -1,0 +1,46 @@
+{include file='ebcms@common/header' /}
+{php}
+    $user = \app\user\model\User::get(input('id'));
+    $currency = $user['currency'];
+{/php}
+<div class="container-fluid">
+    <caption><h3 class="text-danger">账户信息（ID:{$user.id}）</h3></caption>
+    <table class="table">
+        <tr>
+            <th>邮箱</th>
+            <td>{$user.email}</td>
+            <th>昵称</th>
+            <td>{$user.nickname}</td>
+            <th>登陆次数</th>
+            <td>{$user.login_times}</td>
+        </tr>
+        <tr>
+            <th>注册时间</th>
+            <td>{$user.create_time|date='Y-m-d H:i:s',###}</td>
+            <th>上次登录</th>
+            <td>{$user.login_time|date='Y-m-d H:i:s',###}</td>
+            <th>登录IP</th>
+            <td>{$user.login_ip}</td>
+        </tr>
+    </table>
+    <caption><h3 class="text-danger">财务信息</h3></caption>
+    {php}
+        $currencys = \ebcms\Config::get('user.base.currency');
+        $num = 0;
+    {/php}
+    <table class="table">
+        <tr>
+            {foreach name='currencys' item='vo'}
+            {if condition="$num && $num%3 == 0"}
+            </tr><tr>
+            {/if}
+            <th>{$vo}</th>
+            <td>{$currency[$key]|default='不存在'}</td>
+            {php}
+                $num++;
+            {/php}
+            {/foreach}
+        </tr>
+    </table>
+</div>
+{include file='ebcms@common/footer' /}

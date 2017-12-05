@@ -1,0 +1,105 @@
+{include file='index@common/header' /}
+<div class="row">
+    <div class="col-md-9">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h1>{$content.title}</h1>
+                <div >
+                    <span>发布时间：[ {$content.create_time|date='Y-m-d H:i',###} ]&nbsp;&nbsp;</span>
+                    <span>点击：[ {$content.click} ]</span>
+                </div>
+                <hr>
+                {if condition="$content['ext']['currency_on'] && check_app('superpay')"}
+                    {php}
+                        $buy = new \app\superpay\Buy();
+                        //必填
+                        $buy -> sign = 'content_'.$content['id']; //唯一标志
+                        $buy -> price = $content['ext']['price']; //价格
+                        $buy -> currency = $content['ext']['currency']; //货币类型
+                        $buy -> title = '付费查看内容:'.$content['title']; //说明
+
+                        //选填
+                        $buy -> code_expire = 60; //支付代码有效期 单位秒 默认60秒
+                        $buy -> expire = $content['ext']['expire']; //支付有效期 过期需要重新支付 0为无限期 默认无限期
+                    {/php}
+                    {if condition="$buy -> need_buy"}
+                    <div class="alert alert-danger alert-dismissible fade in" role="alert">
+                        <p style="font-size:2em;">查看该内容您需要支付 <strong>{$buy->price}</strong> {$buy->currency_name}</p>
+                        <hr>
+                        <p>
+                            <script>
+                                var _M_ = {};
+                                $(function() {
+                                    _M_.buy = function(price,currency_name){
+                                        if (window.confirm("您确定支付 " + price + " " + currency_name + " 吗？")) {
+                                            $.ajax({
+                                                url: '{$buy->url}',
+                                                type: 'POST',
+                                                dataType: 'json',
+                                                data: {
+                                                    code: '{$buy -> code}'
+                                                },
+                                                success:function(data){
+                                                    alert(data.msg);
+                                                    if (data.code) {
+                                                        self.location=data.url;
+                                                    }
+                                                },
+                                                error:function(){
+                                                    alert('服务器错误，请稍后再试！');
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            </script>
+                            <button type="button" class="btn btn-danger" onclick="_M_.buy('{$buy->price}','{$buy->currency_name}');">立即支付</button>
+                            <button type="button" class="btn btn-default">如何获取{$buy->currency_name}？</button>
+                        </p>
+                        {if condition="$buy->code_expire"}<p>请在{$buy->code_expire}秒内完成支付！</p>{/if}
+                    </div>
+                    {else/}
+                        {$content.body.body|htmlspecialchars_decode}
+                    {/if}
+                {else/}
+                    {$content.body.body|htmlspecialchars_decode}
+                {/if}
+                {notempty name='content.tag'}
+                    <hr>
+                    <h4><b class="text-danger">延伸阅读：{foreach name='content.tag' item='vo'} <a href="{$vo.url}">{$vo.tag}</a>{/foreach}</b></h4>
+                    <ol style="padding-left: 20px;">
+                    {php}
+                        $guanlian = $content -> relations() -> limit(10) -> select();
+                    {/php}
+                    {foreach name='guanlian' item='vo'}
+                        <li><a href="{$vo.url}">{$vo.shorttitle}</a></li>
+                    {/foreach}
+                    </ol>
+                {/notempty}
+                <hr>
+                <nav>
+                  <ul class="pager">
+                    {notempty name='content.prev'}
+                    <li class="previous"><a href="{$content.prev.url}"><span aria-hidden="true">&larr;</span> {$content.prev.title}</a></li>
+                    {else/}
+                    <li class="previous disabled"><a href="javascript:void(0);"><span aria-hidden="true">&larr;</span> 没有了</a></li>
+                    {/notempty}
+                    {notempty name='content.next'}
+                    <li class="next"><a href="{$content.next.url}">{$content.next.title} <span aria-hidden="true">&rarr;</span></a></li>
+                    {else/}
+                    <li class="next disabled"><a href="javascript:void(0);">没有了 <span aria-hidden="true">&rarr;</span></a></li>
+                    {/notempty}
+                  </ul>
+                </nav>
+                {if condition="check_app('user')"}
+                    <iframe src="{:url('user/comment/index',['group'=>'content','key'=>'content_'.$content['id'],'size'=>5,'type'=>1])}" frameborder="0" width="100%" scrolling=no height="auto" frameBorder=0></iframe>
+                {/if}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        {include file='common/side' /}
+    </div>
+
+</div>
+{include file='index@common/footer' /}

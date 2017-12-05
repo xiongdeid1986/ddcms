@@ -1,0 +1,33 @@
+<div class="form-group">
+	<label for="captcha" class="col-sm-2 control-label">
+		验证码
+	</label>
+	<div class="col-sm-10" id="captcha_container">
+		<input type="text" name="captcha" class="form-control" id="captcha" placeholder="请输入验证码">
+		<script>
+			var change_captcha = function(selecter){
+				var url = $(selecter).attr('src');
+				if (-1 != url.lastIndexOf('#')) {
+					url = url.substring(0, url.lastIndexOf('#'));
+				}
+				$(selecter).attr('src',url + "#" + Math.random());
+			}
+			$(function() {
+				$('#captcha').focus(function(event) {
+					if (!$('#captcha_img').length) {
+						$('#captcha').before('<img class="img-rounded img-captcha" width="200" id="captcha_img" onclick="change_captcha(\'#captcha_img\');" src="{:url('index/api/captcha')}" alt="验证码" title="点击更换验证码">')
+					}
+					$('#captcha_img').css({
+						top: $("#captcha").position().top-$('#captcha_img').height()-2,
+					});
+					$('#captcha_img').show();
+				});
+				$('#captcha_container').hover(function() {
+					$('#captcha_img').show();
+				}, function() {
+					$('#captcha_img').hide();
+				});
+			});
+		</script>
+	</div>
+</div>

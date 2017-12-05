@@ -1,0 +1,71 @@
+{include file='common/header' /}
+<div class="row">
+    <div class="col-md-3">
+        {include file='common/left' /}
+    </div>
+    <div class="col-md-9">
+        {php}
+            $user = user();
+        {/php}
+        {if condition="$user['message_count']"}
+        <div class="alert alert-danger" role="alert">
+            您有{$user.message_count}条新消息，<a href="{:url('user/index/message')}" class="alert-link">点击查看</a>
+        </div>
+        {/if}
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h3><a href="{:url('user/auth/logout')}" class="btn btn-danger pull-right">退出</a>您好，<b>{$user.nickname}</b>！</h3>
+                <hr>
+                <p>您于 {$user.create_time|date='Y-m-d H:i:s',###} 注册成为了本站会员</p>
+                <p>到目前为止，您一共登陆了 {$user.login_times} 次</p>
+            </div>
+        </div>
+        {if condition="!eb_config('user.promote.promote_closed')"}
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h3 class="text-danger">推广有奖</h3>
+                    <hr>
+                    <div class="well">
+                        <div class="form-horizontal" >
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="col-sm-2 control-label">推广链接</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" value="{:request() -> root(true)}/?promote={$Think.session.user_id}">
+                                    <p class="help-block">将链接发送到微博、微信、贴吧等各大平台，可获得奖励！</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {php}
+                        $currencys = \ebcms\Config::get('user.base.currency');
+                        $promote_reg_ncentive = \ebcms\Config::get('user.promote.promote_reg_ncentive');
+                        $promote_access_ncentive = \ebcms\Config::get('user.promote.promote_access_ncentive');
+                    {/php}
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>活动</th>
+                            {foreach name='currencys' item='vo'}
+                            <th>{$vo}</th>
+                            {/foreach}
+                        </tr>
+                        {if condition="!eb_config('user.promote.promote_closed')"}
+                            <tr>
+                                <th>注册奖励：</th>
+                                {foreach name='currencys' item='vo'}
+                                <td>{present name="$promote_reg_ncentive[$key]"}{$promote_reg_ncentive[$key]}{else /}0{/present}</td>
+                                {/foreach}
+                            </tr>
+                            <tr>
+                                <th>访问奖励：</th>
+                                {foreach name='currencys' item='vo'}
+                                <td>{present name="$promote_access_ncentive[$key]"}{$promote_access_ncentive[$key]}{else /}0{/present}</td>
+                                {/foreach}
+                            </tr>
+                        {/if}
+                    </table>
+                </div>
+            </div>
+        {/if}
+    </div>
+</div>
+{include file='common/footer' /}

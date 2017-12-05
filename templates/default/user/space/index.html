@@ -1,0 +1,49 @@
+{include file='common/header' /}
+<div class="row">
+    <div class="col-md-3">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="media">
+                  <div class="media-left">
+                    <a href="{:url('user/space/index',['id'=>$user['id']])}">
+                      <img class="media-object" src="{$user.avatar|thumb=80,80,3}" width="80" height="80" alt="...">
+                    </a>
+                  </div>
+                  <div class="media-body">
+                    <h4 class="media-heading">{$user.nickname}</h4>
+                    <p>{$user.motto|default='欢迎浏览我的空间！'}</p>
+                  </div>
+                </div>
+            </div>
+        </div>
+        {php}
+            $nav = new \app\ebcms\model\Nav();
+            $nav = $nav -> lists() -> where('group','个人空间') -> select();
+            $nav = \ebcms\Tree::tree($nav);
+        {/php}
+        {foreach name="nav" item="vo" }
+            <div class="panel panel-default">
+                <div class="panel-heading">{$vo.title}</div>
+                <div class="list-group">
+                    {foreach name='vo.rows' item='sub'}
+                    <a class="list-group-item" href="{$sub.url}">{$sub.title}</a>
+                    {/foreach}
+                </div>
+            </div>
+        {/foreach}
+    </div>
+    <div class="col-md-9">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h1>欢迎浏览我的空间！</h1>
+                <hr>
+                <div class="alert alert-danger">
+                    <h2>此系统给了您充分的空间！</h2>
+                    <hr>
+                    <h4>您完全可根据自己的需要，开发适合您网站的会员空间！</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{include file='common/footer' /}

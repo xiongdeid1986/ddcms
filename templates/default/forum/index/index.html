@@ -1,0 +1,49 @@
+{include file='common/header' /}
+<div class="row">
+	<div class="col-md-2">
+		{include file='common/left' /}
+	</div>
+	<div class="col-md-10">
+		{php}
+			$order = input('order','id');
+			$sort = input('sort','desc');
+			$order = in_array($order,['id','rethread_time','views','rethreads'])?$order:'id';
+			$sort = in_array($sort,['desc','asc'])?$sort:'desc';
+			$lists = \app\forum\model\Thread::with('forum,user') -> where(['status'=>1]) -> order($order.' '.$sort) -> paginate(15, false, [
+				'query' => input('get.')
+			]);
+			$page = $lists -> render();
+		{/php}
+		<table class="table table-bordered table-hover" style="table-layout: fixed;">
+			<tr>
+				<th style="width: 100px;">作者</th>
+				<th>标题</th>
+				<th style="width: 140px;" class="hidden-xs">
+					<a href="{:url('forum/index/index')}?order=id&sort=desc" rel="nofollow">发帖时间</a>
+				</th>
+				<th style="width: 50px;" class="hidden-xs">
+					<a href="{:url('forum/index/index')}?order=views&sort=desc" rel="nofollow">阅读</a>
+				</th>
+				<th style="width: 50px;" class="hidden-xs">
+					<a href="{:url('forum/index/index')}?order=rethreads&sort=desc" rel="nofollow">跟帖</a>
+				</th>
+				<th style="width: 140px;" class="hidden-xs">
+					<a href="{:url('forum/index/index')}?order=rethread_time&sort=desc" rel="nofollow">最后回帖</a>
+				</th>
+			</tr>
+			{include file='index/top2' /}
+			{foreach name='lists' item='vo'}
+			<tr>
+				<td>{notempty name='vo.user.nickname'}<a href="{$vo.user.space_url}" class="text-overflow"><img src="{$vo.user.avatar|thumb=14,14,3}" width="14" height="14" alt=""> {$vo.user.nickname}</a>{else}<img src="__ROOT__/system/image/avatar.gif" width="14" height="14" alt=""> 游客{/notempty}</td>
+				<td><a href="{$vo.forum.url}" class="text-muted">[{$vo.forum.title}]</a>&nbsp;<a href="{$vo.url}" style="{$vo.style}">{$vo.title}</a></td>
+				<td class="hidden-xs">{$vo.create_time|date='Y-m-d H:i',###}</td>
+				<td class="hidden-xs">{$vo.views}</td>
+				<td class="hidden-xs">{$vo.rethreads2}</td>
+				<td class="hidden-xs">{$vo.rethread_time|date='Y-m-d H:i',###}</td>
+			</tr>
+			{/foreach}
+		</table>
+		{$page}
+	</div>
+</div>
+{include file='common/footer' /}

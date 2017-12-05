@@ -1,0 +1,964 @@
+{include file='common/header'/}
+
+{php}$slider_data='';{/php}
+{if condition="$slider"}
+    {foreach $slider as $k => $v}
+    {php}$slider_data.='&quot;'.$v['img'].'&quot;';
+        if ($k != count($slider)-1)$slider_data.=',';
+    {/php}
+    {/foreach}
+{php}if($slider_data == '&quot;&quot;')$slider_data='';{/php}
+{/if}
+<section class="slider-full" data-zs-speed="12000" data-zs-interval="7000" data-zs-switchspeed="4000" data-zs-src="[{$slider_data|default='&quot;/assets/images/slider-default.jpg&quot;'}]">
+    {foreach $slider as $k => $v}
+        <div class="item">
+            <div class="container">
+                <div class="content">
+                    <h3>{$v.title} <br /><span>{$v.subtitle}</span></h3>
+                    <p>{$v.content}</p>
+                    <a href="{$v.url|default='javascript:;'}" class="btn btn-pink btn-lg btn-black-bg">{$v.button|default='联系我们'}</a>
+                </div>
+            </div>
+        </div>
+    {/foreach}
+</section>
+<div class="icons-best">
+    <div class="container">
+        <h3>欢迎光临 {$global.web.base.company_short}.
+            <br /><span>欢迎来电洽谈,我们将给您更好的服务。</span></h3>
+        <div class="icons row">
+            {php}$icons = array("fa icon iconfont icon-serve","fa icon iconfont icon-jian","fa icon iconfont icon-fuwulinian","fa icon iconfont icon-8636c36c","fa fa-universal-access","fa icon iconfont icon-chuangxin");{/php}
+            {foreach $global.web.feature.feature_title as $k => $v}
+                <div class="col-lg-2 col-md-4 col-sm-4 col-xs-6 col-ms-4 icon-1" >
+                    <span style="display: block;width: 100%;margin-bottom: 15px;"><i class="{php}
+                        $_i = isset($global['web']['feature']['feature_icon'][$k]) ? $global['web']['feature']['feature_icon'][$k] : $icons[$k];
+                        $_i = !empty($_i) ? $_i : (isset($icons[$k]) ? $icons[$k] : 'fa fa-meh-o');
+                        echo $_i
+                     {/php}" style="font-size: 70px;color: #FAB00F;"></i></span>
+                    <span style="display: block;line-height: 32px;margin-top: 10px;">{$v}</span>
+                </div>
+            {/foreach}
+        </div>
+    </div>
+</div>
+<section class="calculator calculator-pink" style="background: #FF395C;padding: 0;">
+    <div class="container">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            {php}
+            $Channel = \app\content\model\Channel::where(['status'=>1,'id'=>4]) -> order('sort desc,id asc') -> select();
+            $Channel = \ebcms\Tree::tree($Channel);
+            {/php}
+            {foreach name='$Channel' item='channel_data' } <a href="{$channel_data.url}"><img src="/assets/images/discounts.jpg" style="width: 100%;" / ></a>{/foreach}
+        </div>
+    </div>
+</section>
+<!--案例中心-->
+{php}
+$data = \app\content\model\Channel::where(['pid'=>2,'status'=>1,'eb_url'=>'']) -> order('sort desc,id asc') -> select();
+{/php}
+<section class="trainings" style="margin-bottom: 80px;">
+    <div class="container">
+        {php}
+        $Channel = \app\content\model\Channel::where(['status'=>1,'id'=>2]) -> order('sort desc,id asc') -> select();
+        $Channel = \ebcms\Tree::arr($Channel);
+        {/php}
+        <a href="{$Channel.url}"><h3>{$Channel.title}</h3></a>
+        <div class="block-tabs row">
+            <div class="col-lg-8 col-md-8">
+                <div class="blocks-large" >
+                        {foreach name='$data' item='vo'}
+                        <div class="block-large block-{$key+1} {if condition='($key eq 0)'} active{/if}"  >
+                                {empty name='vo.subs'}
+                                {eq name='vo.eb_url' value=''}
+                                {php}
+                                    $lists = $vo -> lists() -> limit(8) -> order('id desc') -> select();
+                                {/php}
+                                {foreach name='lists' item='vs'}
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-ms-6" style="height: 300px;overflow: hidden;background: #fff;">
+                                        <a href="{$vs.url}" target="_blank" class="photo"><img style="height: 200px;" src="{$vs.thumb|default='/system/image/logo.png'}" class="full-width" alt="{$vs.shorttitle|mb_substr=0,24}"></a>
+                                        <div class="descr">
+                                            <a href="{$vs.url}" title="{$vs.shorttitle}" target="_blank" class="header"> <span style="text-overflow: ellipsis; width: 100%; height: 3.8em; display: block; overflow: hidden;">{$vs.shorttitle}</span></a> 日期:{$vs.update_time|date='Y-m-d',###}
+                                        </div>
+                                </div>
+                                {/foreach}
+                                {/eq}
+                                {/empty}
+                        </div>
+                        {/foreach}
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4">
+                <div class="items">
+                    {php}$n = 1;{/php}
+                    {foreach name='$data' item='vo'}
+                    <a href="{$vo.url}" class="item item-{$n} {if condition='($n eq 1)'} active{/if}" data-block="block-{$n}"><span class="header">{$vo.title}</span><p>{$vo.description}</p></a>
+                    {php}$n ++;{/php}
+                    {/foreach}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--大数据统计-->
+<section class="skills parallax" style="background-image: url(assets/images/skills-parallax.jpg);">
+    <div class="container">
+        <h3>{$global.web.base.company_short} <span>大数据</span></h3>
+        <div class="row">
+            <div class="col-lg-3 col-md-3 col-sm-6 col-ms-6">
+                <div class="item">
+                    <span id="countUp-1">794</span> happy customers
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-ms-6">
+                <div class="item">
+                    <span id="countUp-2">97</span> individual nutrition programs
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-ms-6">
+                <div class="item">
+                    <span id="countUp-3">130</span> high quality equipment
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-ms-6">
+                <div class="item">
+                    <span id="countUp-4">26</span> champions trained
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--产品中心-->
+{php}
+    $data = \app\content\model\Channel::where(['pid'=>1,'status'=>1,'eb_url'=>'']) -> order('sort desc,id asc') -> select();
+{/php}
+<section class="coaches">
+    <div class="container">
+        {php}
+        $Channel = \app\content\model\Channel::where(['status'=>1,'id'=>1]) -> order('sort desc,id asc') -> select();
+        $Channel = \ebcms\Tree::arr($Channel);
+        {/php}
+        <a href="{$Channel.url}"><h3>{$Channel.title}</h3></a>
+        {foreach name='$data' item='vo'}
+        <a href="{$vo.url}" data-index="{$key}" class="btn btn-pink" onclick="$('#product').children().hide();$('#product').children().eq($(this).attr('data-index')).show();return false;">{$vo.title}</a>
+        {/foreach}
+        <div id="product">
+            {foreach name='$data' item='vo'}
+            <div class="row" style="margin-top: 30px;{if condition='($key neq 0)'} display:none{/if}">
+                {empty name='vo.subs'}
+                {eq name='vo.eb_url' value=''}
+                {php}
+                $lists = $vo -> lists() -> limit(4) -> order('id desc') -> select();
+                {/php}
+                {foreach name='lists' item='vs'}
+                <div class="col-lg-3 col-md-6 col-sm-6 col-ms-6">
+                    <div class="item">
+                        <a href="{$vs.url}" class="photo"><img style="height: 250px;" src="{$vs.thumb|default='/system/image/logo.png'}" class="full-width" alt="{$vs.shorttitle}" /></a>
+                        <div class="descr">
+                            <a href="{$vs.url}" class="header">{$vo.title} <span>{$vs.shorttitle}</span></a>
+                            <br /> 发布日期:
+                            <strong>{$vs.update_time|date='Y-m-d',###}</strong>
+                        </div>
+                    </div>
+                </div>
+                {/foreach}
+                {/eq}
+                {/empty}
+            </div>
+            {/foreach}
+        </div>
+    </div>
+</section>
+{if condition="check_app('mbzs')"}
+<section class="clients">
+    <div class="container">
+        <a href="/forum"><h3>用户 <span>留言中心</span></h3></a>
+        {php}
+            $lists = \app\forum\model\Thread::with('forum,user') -> where(['status'=>1,'forum_id'=>['in','1,2']]) -> order('id desc,rethread_time desc') -> limit(15) -> select();
+        {/php}
+        <div class="items">
+            <div class="clients-slider">
+                <div class="swiper-wrapper">
+                    {foreach name='lists' item='vo'}
+                    <div class="swiper-slide">
+                        <div class="item">
+                            <div class="person">
+                                {notempty name='vo.user.nickname'}
+                                <a href="{$vo.user.space_url}" class="text-overflow">
+                                    <img src="{$vo.user.avatar|thumb=14,14,3}"  alt="">
+                                </a>
+                                    <div class="name">
+                                        {$vo.user.nickname}
+                                    </div>
+                                {else}
+                                    <img src="/system/image/avatar.gif" alt="">
+                                    <div class="name">
+                                        游客
+                                    </div>
+                                {/notempty}
+                            </div>
+                            <a href="{$vo.forum.url}"> <span style="color:#23182C;">{$vo.forum.title} [点击留言]</span></a>
+                            <div class="text">
+                                <a href="{$vo.url}" style="{$vo.style}">{$vo.title}</a>
+                                <br />创建时间:{$vo.create_time|date='Y-m-d H:i',###} / 查看:{$vo.views} / 回复:{$vo.rethreads2} / 最后回贴:{$vo.rethread_time|date='Y-m-d H:i',###}
+                            </div>
+                        </div>
+                    </div>
+                    {/foreach}
+{/if}
+                </div>
+                <div class="swiper-pagination"></div>
+                <a href="#" class="arrow-left fa fa-arrow-circle-left"></a>
+                <a href="#" class="arrow-right fa fa-arrow-circle-right"></a>
+            </div>
+        </div>
+    </div>
+</section>
+<!--公司新闻-->
+{php}
+$data = \app\content\model\Channel::where(['pid'=>21,'status'=>1,'eb_url'=>'']) -> order('sort desc,id asc') -> select();
+{/php}
+<header style="padding: 80px 0 50px 0;">
+<div class="container">
+    {php}
+    $Channel = \app\content\model\Channel::where(['status'=>1,'id'=>21]) -> order('sort desc,id asc') -> select();
+    $Channel = \ebcms\Tree::arr($Channel);
+    {/php}
+    <h1><a href="{$Channel.url}">{$Channel.title}</a></h1>
+    <ol class="bread">
+        {foreach name='$data' item='vo'}
+        <li><a href="{$vo.url}"><span>{$vo.title}</span></a></li>
+        {if condition='$key != count($data)-1'}
+            <li class="divider"><span>|</span></li>
+        {/if}
+        {/foreach}
+    </ol>
+</div>
+</header>
+<div class="container">
+    <div class="inner-two-col row">
+        <div class="col-lg-8">
+            <div class="blog">
+                <div class="row">
+                    <div class="col-lg-6 col-md-6 col-sm-6">
+                        <div class="item">
+                            <a href="post.html" class="photo"><img src="assets/images/_food-1.jpg" class="full-width" alt="Food"></a>
+                            <div class="description">
+                                <a href="post.html" class="header">The best choice for your muscles</a>
+                                <p class="text">
+                                    Quisque quis dignissim elit. Aliquam et augue aliquet orci maximus convallis id vitae augue. Phasellus elementum commodo aliquet. Sed vitae sem in arcu auctor pharetra vel ut erat.
+                                </p>
+                            </div>
+                            <div class="bottom">
+                                <div class="row">
+                                    <div class="col-lg-6 col-sm-12  col-xs-6">
+                                        <span class="date">January 2, 2017</span>
+                                    </div>
+                                    <div class="col-lg-6 col-sm-12  col-xs-6 right">
+                                        <ul>
+                                            <li class="icon-fav fa fa-heart"><a href="#">162</a></li>
+                                            <li class="icon-comments fa fa-commenting"><a href="#">14</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-6">
+                        <div class="item">
+                            <a href="post.html" class="photo"><img src="assets/images/_food-2.jpg" class="full-width" alt="Food"></a>
+                            <div class="description">
+                                <a href="post.html" class="header">10 recipes for mushrooms</a>
+                                <p class="text">
+                                    Quisque quis dignissim elit. Aliquam et augue aliquet orci maximus convallis id vitae augue. Phasellus elementum commodo aliquet. Sed vitae sem in arcu auctor pharetra vel ut erat.
+                                </p>
+                            </div>
+                            <div class="bottom">
+                                <div class="row">
+                                    <div class="col-lg-6 col-sm-12 col-xs-6">
+                                        <span class="date">January 2, 2017</span>
+                                    </div>
+                                    <div class="col-lg-6 col-sm-12 col-xs-6 right">
+                                        <ul>
+                                            <li class="icon-fav fa fa-heart"><a href="#">162</a></li>
+                                            <li class="icon-comments fa fa-commenting"><a href="#">14</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-6 ">
+                        <div class="item">
+                            <a href="post.html" class="photo"><img src="assets/images/_food-3.jpg" class="full-width" alt="Food"></a>
+                            <div class="description">
+                                <a href="post.html" class="header">How to choose the meat?</a>
+                                <p class="text">
+                                    Quisque quis dignissim elit. Aliquam et augue aliquet orci maximus convallis id vitae augue. Phasellus elementum commodo aliquet. Sed vitae sem in arcu auctor pharetra vel ut erat.
+                                </p>
+                            </div>
+                            <div class="bottom">
+                                <div class="row">
+                                    <div class="col-lg-6 col-sm-12 col-xs-6">
+                                        <span class="date">January 2, 2017</span>
+                                    </div>
+                                    <div class="col-lg-6 col-sm-12 col-xs-6 right">
+                                        <ul>
+                                            <li class="icon-fav fa fa-heart"><a href="#">55</a></li>
+                                            <li class="icon-comments fa fa-commenting"><a href="#">9</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-6 ">
+                        <div class="item">
+                            <a href="post.html" class="photo"><img src="assets/images/_food-4.jpg" class="full-width" alt="Food"></a>
+                            <div class="description">
+                                <a href="post.html" class="header">How to choose the meat?</a>
+                                <p class="text">
+                                    Quisque quis dignissim elit. Aliquam et augue aliquet orci maximus convallis id vitae augue. Phasellus elementum commodo aliquet. Sed vitae sem in arcu auctor pharetra vel ut erat.
+                                </p>
+                            </div>
+                            <div class="bottom">
+                                <div class="row">
+                                    <div class="col-lg-6 col-sm-12 col-xs-6">
+                                        <span class="date">January 2, 2017</span>
+                                    </div>
+                                    <div class="col-lg-6 col-sm-12 col-xs-6 right">
+                                        <ul>
+                                            <li class="icon-fav fa fa-heart"><a href="#">55</a></li>
+                                            <li class="icon-comments fa fa-commenting"><a href="#">9</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-6 ">
+                        <div class="item">
+                            <a href="post.html" class="photo"><img src="assets/images/_food-5.jpg" class="full-width" alt="Food"></a>
+                            <div class="description">
+                                <a href="post.html" class="header">How to choose the meat?</a>
+                                <p class="text">
+                                    Quisque quis dignissim elit. Aliquam et augue aliquet orci maximus convallis id vitae augue. Phasellus elementum commodo aliquet. Sed vitae sem in arcu auctor pharetra vel ut erat.
+                                </p>
+                            </div>
+                            <div class="bottom">
+                                <div class="row">
+                                    <div class="col-lg-6 col-sm-12 col-xs-6">
+                                        <span class="date">January 2, 2017</span>
+                                    </div>
+                                    <div class="col-lg-6 col-sm-12 col-xs-6 right">
+                                        <ul>
+                                            <li class="icon-fav fa fa-heart"><a href="#">55</a></li>
+                                            <li class="icon-comments fa fa-commenting"><a href="#">9</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-6 ">
+                        <div class="item">
+                            <a href="post.html" class="photo"><img src="assets/images/_food-6.jpg" class="full-width" alt="Food"></a>
+                            <div class="description">
+                                <a href="post.html" class="header">How to choose the meat?</a>
+                                <p class="text">
+                                    Quisque quis dignissim elit. Aliquam et augue aliquet orci maximus convallis id vitae augue. Phasellus elementum commodo aliquet. Sed vitae sem in arcu auctor pharetra vel ut erat.
+                                </p>
+                            </div>
+                            <div class="bottom">
+                                <div class="row">
+                                    <div class="col-lg-6 col-sm-12 col-xs-6">
+                                        <span class="date">January 2, 2017</span>
+                                    </div>
+                                    <div class="col-lg-6 col-sm-12 col-xs-6 right">
+                                        <ul>
+                                            <li class="icon-fav fa fa-heart"><a href="#">55</a></li>
+                                            <li class="icon-comments fa fa-commenting"><a href="#">9</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pages">
+                    <a href="#" class="back disabled"><span class="fa fa-arrow-circle-left"></span> back</a>
+                    <a href="#" class="page active">1</a>
+                    <a href="#" class="page">2</a>
+                    <a href="#" class="page">3</a>
+                    <a href="#" class="next">forward <span class="fa fa-arrow-circle-right"></span></a>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+            <div class="block-col">
+                <div class="header">推荐新闻</div>
+                <div class="content">
+                    <ul>
+                        <li class="active"><a href="#"><strong>Sports nutrition and diet <span>(4)</span></strong></a></li>
+                        <li><a href="#">Training <span>(27)</span></a></li>
+                        <li><a href="#">A set of muscle mass <span>(33)</span></a></li>
+                        <li><a href="#">Weight loss <span>(3)</span></a></li>
+                        <li><a href="#">Physical appearance and beauty <span>(1)</span></a></li>
+                        <li><a href="#">Pharmacology <span>(19)</span></a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="block-col">
+                <div class="header">Search</div>
+                <div class="content">
+                    <form class="form search-col" method="get">
+                        <input type="text" name="search" value="" placeholder="Search">
+                        <button type="submit" class="fa fa-search"></button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="block-col">
+                <div class="header">Insta Gallery</div>
+                <div class="content">
+                    <div class="gallery-small row">
+                        <a href="assets/images/_gallery-1.jpg" class="swipebox col-lg-4 col-md-4 col-sm-6 col-xs-6"><img src="assets/images/_gallery-1.jpg" class="full-width" alt="Gallery"></a>
+                        <a href="assets/images/_gallery-2.jpg" class="swipebox col-lg-4 col-md-4 col-sm-6 col-xs-6"><img src="assets/images/_gallery-2.jpg" class="full-width" alt="Gallery"></a>
+                        <a href="assets/images/_gallery-3.jpg" class="swipebox col-lg-4 col-md-4 col-sm-6 col-xs-6"><img src="assets/images/_gallery-3.jpg" class="full-width" alt="Gallery"></a>
+                        <a href="assets/images/_gallery-4.jpg" class="swipebox col-lg-4 col-md-4 col-sm-6 col-xs-6"><img src="assets/images/_gallery-4.jpg" class="full-width" alt="Gallery"></a>
+                        <a href="assets/images/_gallery-5.jpg" class="swipebox col-lg-4 col-md-4 col-sm-6 col-xs-6"><img src="assets/images/_gallery-5.jpg" class="full-width" alt="Gallery"></a>
+                        <a href="assets/images/_gallery-6.jpg" class="swipebox col-lg-4 col-md-4 col-sm-6 col-xs-6"><img src="assets/images/_gallery-6.jpg" class="full-width" alt="Gallery"></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="block-col">
+                <div class="header">Tags</div>
+                <div class="content">
+                    <div class="tags clearfix">
+                        <a href="#">#gym</a>
+                        <a href="#">#fitness</a>
+                        <a href="#">#sports</a>
+                        <a href="#">#nutrition</a>
+                        <a href="#">#trainings</a>
+                        <a href="#">#food</a>
+                        <a href="#">#bodybuilding</a>
+                        <a href="#">#gym</a>
+                        <a href="#">#fitness</a>
+                        <a href="#">#sports</a>
+                        <a href="#">#nutrition</a>
+                        <a href="#">#trainings</a>
+                        <a href="#">#food</a>
+                        <a href="#">#bodybuilding</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<section class="blog" id="blog-main">
+    <div class="container">
+        {php}
+        $Channel = \app\content\model\Channel::where(['status'=>1,'id'=>21]) -> order('sort desc,id asc') -> select();
+        $Channel = \ebcms\Tree::arr($Channel);
+        {/php}
+        <a href="{$Channel.url}"><h3>{$Channel.title}</h3></a>
+        <div class="row">
+            <div class="col-lg-4 col-md-4 col-sm-4">
+                <div class="item">
+                    <a href="post.html" class="photo"><img src="assets/images/_food-1.jpg" class="full-width" alt="Food" /></a>
+                    <div class="description">
+                        <a href="post.html" class="header">The best choice for your muscles</a>
+                        <p class="text">Quisque quis dignissim elit. Aliquam et augue aliquet orci maximus convallis id vitae augue. Phasellus elementum commodo aliquet. Sed vitae sem in arcu auctor pharetra vel ut erat. Fusce vestibulum, urna sit amet convallis ornare, erat urna viverra nisl, sed gravida tortor ipsum mollis augue.</p>
+                    </div>
+                    <div class="bottom">
+                        <div class="row">
+                            <div class="col-lg-6 col-sm-12  col-xs-4">
+                                <span class="date">January 2, 2017</span>
+                            </div>
+                            <div class="col-lg-6 col-sm-12  col-xs-8 col-ms-8 right">
+                                <ul>
+                                    <li class="icon-fav fa fa-heart"><a href="#">212</a></li>
+                                    <li class="icon-comments fa fa-commenting"><a href="#">4</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-4">
+                <div class="item">
+                    <a href="post.html" class="photo"><img src="assets/images/_food-2.jpg" class="full-width" alt="Food" /></a>
+                    <div class="description">
+                        <a href="post.html" class="header">10 ways to include mushrooms</a>
+                        <p class="text">Quisque quis dignissim elit. Aliquam et augue aliquet orci maximus convallis id vitae augue. Phasellus elementum commodo aliquet. Sed vitae sem in arcu auctor pharetra vel ut erat. Quisque quis dignissim elit. Fusce vestibulum, urna sit amet convallis ornare, erat urna viverra nisl, sed gravida tortor ipsum mollis augue.</p>
+                    </div>
+                    <div class="bottom">
+                        <div class="row">
+                            <div class="col-lg-6 col-sm-12  col-xs-6">
+                                <span class="date">January 2, 2017</span>
+                            </div>
+                            <div class="col-lg-6 col-sm-12  col-xs-6 right">
+                                <ul>
+                                    <li class="icon-fav fa fa-heart"><a href="#">162</a></li>
+                                    <li class="icon-comments fa fa-commenting"><a href="#">14</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-4">
+                <div class="item">
+                    <a href="post.html" class="photo"><img src="assets/images/_food-3.jpg" class="full-width" alt="Food" /></a>
+                    <div class="description">
+                        <a href="post.html" class="header">How to choose the meat?</a>
+                        <p class="text">Quisque quis dignissim elit. Aliquam et augue aliquet orci maximus convallis id vitae augue. Phasellus elementum commodo aliquet. Sed vitae sem in arcu auctor pharetra vel ut erat.</p>
+                    </div>
+                    <div class="bottom">
+                        <div class="row">
+                            <div class="col-lg-6 col-sm-12  col-xs-6">
+                                <span class="date">January 2, 2017</span>
+                            </div>
+                            <div class="col-lg-6 col-sm-12  col-xs-6 right">
+                                <ul>
+                                    <li class="icon-fav fa fa-heart"><a href="#">55</a></li>
+                                    <li class="icon-comments fa fa-commenting"><a href="#">9</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="btn-more">
+            <a href="#" class="btn btn-pink">read more</a>
+        </div>
+    </div>
+</section>
+
+<section class="block-white">
+    <div class="container">
+        <div class="bg" style="background-image: url(assets/images/_start-photo-pink.png);">
+            <div class="content">
+                <h3>Be stronger <br /><span>change your body with stargym</span></h3>
+                <p>Phasellus elementum commodo aliquet. Sed vitae sem in arcu auctor pharetra vel ut erat. Praesent mattis nisi laoreet ex tempus auctor. Nullam vitae arcu euismod, placerat mi id, ornare lorem. Morbi vulputate dui purus, ut sodales dolor hendrerit. Curabitur et purus at urna tristique pharetra.</p>
+                <a href="#" class="btn btn-lg btn-pink">start now</a>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="plans parallax" style="background-image: url(assets/images/_block-black-parallax.jpg);">
+    <div class="container">
+        <h3>Choose your personal <br /><span>training plan</span></h3>
+        <div class="row">
+            <div class="col-lg-3 col-md-6 col-sm-6 col-ms-6">
+                <div class="item">
+                    <div class="header header-light">
+                        <div class="sub">
+                            <span>1</span>training
+                        </div>
+                        <span>Free</span>
+                    </div>
+                    <ul>
+                        <li class="yes">Cardio</li>
+                        <li>Swimming Pool</li>
+                        <li class="yes">Gym</li>
+                        <li>Group Lessons</li>
+                        <li>Aerobics</li>
+                        <li>Crossfit</li>
+                    </ul>
+                    <a href="#" class="btn btn-pink">I want it</a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-ms-6">
+                <div class="item">
+                    <div class="header">
+                        <div class="sub">
+                            <span>3</span>trainings
+                        </div>
+                        <span>$25</span>
+                    </div>
+                    <ul>
+                        <li class="yes">Cardio</li>
+                        <li>Swimming Pool</li>
+                        <li>Gym</li>
+                        <li class="yes">Group Lessons</li>
+                        <li class="yes">Aerobics</li>
+                        <li class="yes">Crossfit</li>
+                    </ul>
+                    <a href="#" class="btn btn-pink">I want it</a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-ms-6">
+                <div class="item">
+                    <div class="header">
+                        <div class="sub">
+                            <span>7</span>trainings
+                        </div>
+                        <span>$49</span>
+                    </div>
+                    <ul>
+                        <li class="yes">Cardio</li>
+                        <li>Swimming Pool</li>
+                        <li class="yes">Gym</li>
+                        <li class="yes">Group Lessons</li>
+                        <li class="yes">Aerobics</li>
+                        <li class="yes">Crossfit</li>
+                    </ul>
+                    <a href="#" class="btn btn-pink">I want it</a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-ms-6">
+                <div class="item label-recomend">
+                    <div class="header">
+                        <div class="sub">
+                            <span>20</span>trainings
+                        </div>
+                        <span>$129</span>
+                    </div>
+                    <ul>
+                        <li class="yes">Cardio</li>
+                        <li class="yes">Swimming Pool</li>
+                        <li class="yes">Gym</li>
+                        <li class="yes">Group Lessons</li>
+                        <li class="yes">Aerobics</li>
+                        <li class="yes">Crossfit</li>
+                    </ul>
+                    <a href="#" class="btn btn-pink">I want it</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="block-dark">
+    <div class="bg" style="background-image: url(assets/images/_weight-mask.png);">
+        <div class="container">
+            <h3>Have extra weight? <br /><span>Get special nutrition program</span></h3>
+            <p>Fusce vestibulum, urna sit amet convallis ornare, erat urna viverra nisl, sed gravida tortor ipsum mollis augue. Curabitur sollicitudin risus ultricies ante congue, sit amet sollicitudin est ultricies. Aenean finibus libero ac nunc molestie lobortis.</p>
+            <a href="#" class="btn btn-pink btn-lg btn-black-bg">Get started</a>
+        </div>
+    </div>
+</section>
+<section class="cards">
+    <div class="container">
+        <h3>Get Your <span>Club card</span></h3>
+        <div class="description">
+            Club card entitles you to visit our club from 9:00
+            <br />to 23:00 every day, seven days a week
+        </div>
+        <div class="row">
+            <div class="col-lg-4 col-md-4 col-sm-4 col-ms-4">
+                <div class="item">
+                    <img src="assets/images/_card-1-pink.png" alt="Card 1" />
+                    <div class="price">
+                        <span class="header">Classic</span>
+                        <br />
+                        <span class="val">$90</span>/year
+                    </div>
+                    <div class="btns">
+                        <a href="cards.html" class="btn btn-pink">I want it</a>
+                        <a href="cards.html">details</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-4 col-ms-4">
+                <div class="item">
+                    <img src="assets/images/_card-2-pink.png" alt="Card 2" />
+                    <div class="price">
+                        <span class="header">Lux</span>
+                        <br />
+                        <span class="val">$160</span>/year
+                    </div>
+                    <div class="btns">
+                        <a href="cards.html" class="btn btn-pink">I want it</a>
+                        <a href="cards.html">details</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-4 col-ms-4">
+                <div class="item">
+                    <img src="assets/images/_card-3-pink.png" alt="Card 3" />
+                    <div class="price">
+                        <span class="header">Premium</span>
+                        <br />
+                        <span class="val">$299</span>/year
+                    </div>
+                    <div class="btns">
+                        <a href="cards.html" class="btn btn-pink">I want it</a>
+                        <a href="cards.html">details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="blog" id="blog-main">
+    <div class="container">
+        <h3>Nutrition <span>blog</span></h3>
+        <div class="row">
+            <div class="col-lg-4 col-md-4 col-sm-4">
+                <div class="item">
+                    <a href="post.html" class="photo"><img src="assets/images/_food-1.jpg" class="full-width" alt="Food" /></a>
+                    <div class="description">
+                        <a href="post.html" class="header">The best choice for your muscles</a>
+                        <p class="text">Quisque quis dignissim elit. Aliquam et augue aliquet orci maximus convallis id vitae augue. Phasellus elementum commodo aliquet. Sed vitae sem in arcu auctor pharetra vel ut erat. Fusce vestibulum, urna sit amet convallis ornare, erat urna viverra nisl, sed gravida tortor ipsum mollis augue.</p>
+                    </div>
+                    <div class="bottom">
+                        <div class="row">
+                            <div class="col-lg-6 col-sm-12  col-xs-4">
+                                <span class="date">January 2, 2017</span>
+                            </div>
+                            <div class="col-lg-6 col-sm-12  col-xs-8 col-ms-8 right">
+                                <ul>
+                                    <li class="icon-fav fa fa-heart"><a href="#">212</a></li>
+                                    <li class="icon-comments fa fa-commenting"><a href="#">4</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-4">
+                <div class="item">
+                    <a href="post.html" class="photo"><img src="assets/images/_food-2.jpg" class="full-width" alt="Food" /></a>
+                    <div class="description">
+                        <a href="post.html" class="header">10 ways to include mushrooms</a>
+                        <p class="text">Quisque quis dignissim elit. Aliquam et augue aliquet orci maximus convallis id vitae augue. Phasellus elementum commodo aliquet. Sed vitae sem in arcu auctor pharetra vel ut erat. Quisque quis dignissim elit. Fusce vestibulum, urna sit amet convallis ornare, erat urna viverra nisl, sed gravida tortor ipsum mollis augue.</p>
+                    </div>
+                    <div class="bottom">
+                        <div class="row">
+                            <div class="col-lg-6 col-sm-12  col-xs-6">
+                                <span class="date">January 2, 2017</span>
+                            </div>
+                            <div class="col-lg-6 col-sm-12  col-xs-6 right">
+                                <ul>
+                                    <li class="icon-fav fa fa-heart"><a href="#">162</a></li>
+                                    <li class="icon-comments fa fa-commenting"><a href="#">14</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-4">
+                <div class="item">
+                    <a href="post.html" class="photo"><img src="assets/images/_food-3.jpg" class="full-width" alt="Food" /></a>
+                    <div class="description">
+                        <a href="post.html" class="header">How to choose the meat?</a>
+                        <p class="text">Quisque quis dignissim elit. Aliquam et augue aliquet orci maximus convallis id vitae augue. Phasellus elementum commodo aliquet. Sed vitae sem in arcu auctor pharetra vel ut erat.</p>
+                    </div>
+                    <div class="bottom">
+                        <div class="row">
+                            <div class="col-lg-6 col-sm-12  col-xs-6">
+                                <span class="date">January 2, 2017</span>
+                            </div>
+                            <div class="col-lg-6 col-sm-12  col-xs-6 right">
+                                <ul>
+                                    <li class="icon-fav fa fa-heart"><a href="#">55</a></li>
+                                    <li class="icon-comments fa fa-commenting"><a href="#">9</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="btn-more">
+            <a href="#" class="btn btn-pink">read more</a>
+        </div>
+    </div>
+</section>
+{if condition='$global.web.base.address || $global.web.base.map'}
+    <div data-fixed="{$global.web.base.fixed_phone}" data-logo="{$global.web.base.logo}" data-company="{$global.web.base.company_name}" id="map" data-location="{$global.web.base.map}" data-address="{$global.web.base.address}" data-key="{$global.web.base.key}"></div>
+{/if}
+<section class="subscribe">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-2 col-md-2 col-xs-12 col-ms-12">
+                <span class="percent">-10%</span>
+            </div>
+            <div class="col-lg-4 col-md-4 col-xs-12 col-ms-12">
+                <h3>Subscribe now <span>for discount</span></h3>
+            </div>
+            <div class="col-lg-6 col-md-6 col-xs-12 col-ms-12">
+                <form>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Your e-mail" />
+                        <span class="input-group-btn"><input class="btn btn-black" type="submit" value="Subscribe" /></span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+
+
+{if condition="check_app('content')"}
+    <div class="row">
+        <div class="col-md-5 hidden-xs hidden-sm">
+            <!-- 轮播 -->
+            {php}
+                $content = new \app\content\model\Content();
+                $data = $content -> attrlist('幻灯',4);
+            {/php}
+            <style>
+                .caption{
+                    width: 100%;
+                    background: rgba(0, 0, 0, 0.48);
+                    color: #fff;
+                    position: absolute;
+                    bottom: 0;
+                    padding: 7px;
+                }
+                .carousel-indicators{
+                    bottom: 0px !important;
+                    right: 0 !important;
+                    padding: 7px !important;
+                    margin: 0 !important;
+                    left: initial;
+                    width: initial;
+                }
+            </style>
+            {notempty name="data"}
+                <div id="carousel-example-generic" class="carousel slide" style="border: 1px solid #ddd;" data-ride="carousel">
+
+                    <ol class="carousel-indicators">
+                        {foreach name='data' item='vo'}
+                            <li data-target="#carousel-example-generic" data-slide-to="{$key}" {eq name="key" value="0"}class="active"{/eq}></li>
+                        {/foreach}
+                    </ol>
+
+                    <div class="carousel-inner" role="listbox">
+                        {foreach name='data' item='vo'}
+                            <div class="item {eq name="key" value="0"}active{/eq}">
+                                <a href="{$vo.url}" target="_blank">
+                                <img src="{$vo.thumb|thumb=800,600}" width="800" height="600" alt="{$vo.title}" class="img-responsive" style="width: 500px;height: 350px;">
+                                <div class="caption">
+                                    {$vo.title}
+                                </div>
+                                </a>
+                            </div>
+                        {/foreach}
+                    </div>
+                </div>
+            {/notempty}
+        </div>
+        <div class="col-md-7">
+            <!-- 头条 -->
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    {php}
+                        $content = new \app\content\model\Content();
+                        $data = $content -> attrlist('头条',3);
+                    {/php}
+                    {foreach name="data" item="vo" }
+                        {lt name='key' value='1'}
+                            <div class="media">
+                                <div class="media-left">
+                                    <a href="{$vo.url}" target="_blank">
+                                        <img class="media-object" src="{$vo.thumb|thumb=100,100}" width="100" height="100" alt="...">
+                                    </a>
+                                </div>
+                                <div class="media-body">
+                                    <h3 class="media-heading"><strong><a href="{$vo.url}" target="_blank" class="text-danger" style="{$vo.style}">{$vo.title|mb_substr=0,14}</a></strong></h3>
+                                    <p>{$vo.description|mb_substr=0,100}</p>
+                                </div>
+                            </div>
+                        {else /}
+                            <div class="media">
+                                <div class="media-body">
+                                    <h4 class="media-heading "><strong><a href="{$vo.url}" target="_blank" style="{$vo.style}">{$vo.title}</a></strong></h4>
+                                    <p class="text-muted">{$vo.description|mb_substr=0,120}</p>
+                                </div>
+                            </div>
+                        {/lt}
+                    {/foreach}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-9">
+            <div class="row">
+                {if condition="check_app('mbzs')"}
+                <div class="col-md-12">
+                    <p>
+                        <img src="{:\\app\\mbzs\\Zs::get('index_panel_ad','首页栏目上方')}" alt="" class="img-responsive" style="width:100%;">
+                    </p>
+                </div>
+                {/if}
+            </div>
+        </div>
+        <div class="col-md-3">
+            <!-- 搜索 -->
+            <div class="panel">
+                <form method="get" action="{:url('content/search/index')}" role="search">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" value="" placeholder="Search">
+                        <span class="input-group-btn">
+                            <button class="btn btn-danger" type="submit">搜索</button>
+                        </span>
+                    </div>
+                </form>
+            </div>
+            <!-- 滚动新闻 -->
+            <div class="panel panel-default">
+                <div class="panel-heading">滚动新闻</div>
+                <div class="list-group">
+                    {php}
+                        $data = \app\content\model\Content::where(['status'=>1]) -> order('id desc') -> limit(4) -> select();
+                    {/php}
+                    {foreach name='data' item='vo'}
+                        <a href="{$vo.url}" class="list-group-item">{$vo.shorttitle}</a>
+                    {/foreach}
+                </div>
+            </div>
+            {if condition="check_app('mbzs')"}
+            <p>
+                <img src="{:\\app\\mbzs\\Zs::get('side_ad','侧栏广告')}" alt="">
+            </p>
+            {/if}
+            <!-- 热门标签 -->
+            <div class="panel panel-default">
+                <div class="panel-heading">推荐标签</div>
+                <div class="panel-body">
+                    {php}
+                        $data = \app\content\model\Tag::order('recommend desc,count desc,id desc') -> limit(20) -> select();
+                    {/php}
+                    {foreach name='data' item='vo'}
+                    <a href="{$vo.url}" style="{$vo.style}">{$vo.tag}({$vo.count})</a>  
+                    {/foreach}
+                </div>
+            </div>
+        </div>
+    </div>
+{/if}
+{if condition="check_app('link')"}
+    <div class="row">
+        <div class="col-md-12">
+            <!-- 友情链接 -->
+            <div class="panel panel-default">
+                <div class="panel-heading"><a href="{:url('link/index/index')}" class="pull-right">申请</a>友情链接</div>
+                <div class="panel-body">
+                    {php}
+                        $data = \app\link\model\Link::where(['status'=>1]) -> order('sort desc') -> limit(20) -> select();
+                    {/php}
+                    {foreach name="data" item="vo" }
+                         <a href="{$vo.url}" target='_blank'>{$vo.title}</a> 
+                    {/foreach}
+                </div>
+            </div>
+        </div>
+    </div>
+{/if}
+{include file='common/footer'/}

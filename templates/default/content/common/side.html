@@ -1,0 +1,47 @@
+<!-- 搜索框 -->
+<div class="panel">
+    <form method="get" action="{:url('content/search/index')}" role="search">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" value="" placeholder="Search">
+            <span class="input-group-btn">
+                <button class="btn btn-danger" type="submit">搜索</button>
+            </span>
+        </div>
+    </form>
+</div>
+<!-- 广告 -->
+{if condition="check_app('mbzs')"}
+<p>
+    <img src="{:\\app\\mbzs\\Zs::get('side_ad','侧栏广告')}" alt="">
+</p>
+{/if}
+<!-- 栏目导航 -->
+<div class="panel panel-default">
+    <div class="list-group">
+        {php}
+            $data = \ebcms\Tree::tree(\app\content\model\Channel::where('status',1)->order('sort desc,id asc')->select());
+        {/php}
+        {foreach name='data' item='vo'}
+            <div class="list-group-item"><a href="{$vo.url}"><b>{$vo.title}</b></a></div>
+            {notempty name='vo.rows'}
+                <div class="list-group-item">
+                    {foreach name='vo.rows' item='sub'}
+                        &nbsp;&nbsp;<a href="{$sub.url}" >{$sub.title}</a>
+                    {/foreach}
+                </div>
+            {/notempty}
+        {/foreach}
+    </div>
+</div>
+<!-- 推荐标签 -->
+<div class="panel panel-default">
+    <div class="panel-heading"><span class="pull-right"><a href="{:url('content/tag/index')}">全部</a></span>推荐标签</div>
+    <div class="panel-body">
+        {php}
+        	$data = \app\content\model\Tag::order('recommend desc,count desc,id asc') -> limit(20) -> select();
+        {/php}
+        {foreach name='data' item='vo'}
+        <a href="{$vo.url}" style="{$vo.style}">{$vo.tag}({$vo.count})</a>  
+        {/foreach}
+    </div>
+</div>

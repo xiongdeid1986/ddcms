@@ -1,0 +1,42 @@
+<div class="panel panel-default">
+    <div class="panel-body">
+        <h3><span class="badge pull-right" style="background: #d9534f;"><a href="{:url('user/index/message')}" style="color: #fff;">{:user('message_count')}</a></span><b>{:user('nickname')}</b></h3>
+        <hr>
+        <div class="media">
+            <div class="media-left">
+                <a href="{:url('user/index/index')}">
+                    <img class="media-object" src="{:thumb(user('avatar'),80,80,3)}" width="80" height="80" alt="...">
+                </a>
+            </div>
+            <div class="media-body">
+                {php}
+                    $currency = \ebcms\Config::get('user.base.currency');
+                    $mycurrency = user('currency');
+                {/php}
+                {foreach name='currency' item='vo'}
+                <p>{$vo}：<b>{$mycurrency[$key]}</b></p>
+                {/foreach}
+            </div>
+        </div>
+        <hr>
+        <p>
+            <a href="{:url('info')}" class="btn btn-sm btn-primary">修改信息</a>
+            <a href="{:url('password')}" class="btn btn-sm btn-primary">修改密码</a>
+        </p>
+    </div>
+</div>
+{php}
+    $nav = new \app\ebcms\model\Nav();
+    $nav = $nav -> lists() -> where('group','用户中心') -> select();
+    $nav = \ebcms\Tree::tree($nav);
+{/php}
+{foreach name="nav" item="vo" }
+    <div class="panel panel-default">
+        <div class="panel-heading">{$vo.title}</div>
+        <div class="list-group">
+            {foreach name='vo.rows' item='sub'}
+            <a class="list-group-item" href="{$sub.url}" target="{$sub.target}">{$sub.title}</a>
+            {/foreach}
+        </div>
+    </div>
+{/foreach}

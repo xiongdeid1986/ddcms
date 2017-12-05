@@ -1,0 +1,65 @@
+{include file='ebcms@common/header' /}
+<div class="col-md-12">
+    <h3>
+        <span>友情链接</span>
+        <a href="{:url('ebcms/config/setting?name=link')}"><span class="glyphicon glyphicon-cog text-muted"></span></a>
+        <a href="{:url('add')}"><span class="glyphicon glyphicon-plus text-muted"></span></a>
+    </h3>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover table-ebcms">
+            <tbody>
+                <tr>
+                    <th style="width:80px;">排序</th>
+                    <th>操作</th>
+                    <th>名称</th>
+                    <th>连接</th>
+                </tr>
+                {php}
+                    $data = \app\link\model\Link::order('sort desc,id asc') -> select();
+                    $data = \ebcms\Tree::group($data);
+                {/php}
+                {foreach name='data' item='items' key='group'}
+                    <tr>
+                        <th>{$group}</th>
+                        <th colspan="3">
+                            <a href="{:url('add?group='.$group)}" class="btn btn-primary">添加</a>
+                        </th>
+                    </tr>
+                    {foreach name='items' item='vo'}
+                        <tr>
+                            <td>
+                                <input value="{$vo.sort}" class="form-control input-sm ebcms-change" url="{:url('resort')}" data-id="{$vo.id}">
+                            </td>
+                            <td>
+                                {if condition="check_auth('status')"}
+                                {switch name="vo.status" }
+                                    {case value="99"}
+                                        <button type="button" class="btn btn-danger btn-sm ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='1'>通过</button>
+                                        <button type="button" class="btn btn-danger btn-sm ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='0'>屏蔽</button>
+                                    {/case}
+                                    {case value="1"}
+                                        <button type="button" class="btn btn-primary btn-sm ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='0'>已通过</button>
+                                    {/case}
+                                    {default /}
+                                        <button type="button" class="btn btn-warning btn-sm ebcms-do" url="{:url('status')}" data-ids='{$vo.id}' data-value='1'>已屏蔽</button>
+                                {/switch}
+                                {/if}
+                                {if condition="check_auth('edit')"}
+                                <a href="{:url('edit?id='.$vo['id'])}" class="btn btn-primary btn-sm">编辑</a>
+                                {/if}
+                                {if condition="check_auth('delete')"}
+                                    <button type="button" class="btn btn-primary btn-sm ebcms-do" url="{:url('delete')}" data-ids='{$vo.id}' confirm="删除后不可恢复，确定删除？">删除</button>
+                                {/if}
+                            </td>
+                            <td>
+                                <a href="{$vo.url}" target="_blank">{$vo.title}</a>
+                            </td>
+                            <td>{$vo.url}</td>
+                        </tr>
+                    {/foreach}
+                {/foreach}
+            </tbody>
+        </table>
+    </div>
+</div>
+{include file='ebcms@common/footer' /}

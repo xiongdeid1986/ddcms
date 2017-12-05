@@ -1,0 +1,163 @@
+{include file='common/header' /}
+<div class="row">
+	<div class="col-md-2">
+		{include file='common/left' /}
+	</div>
+	<div class="col-md-10">
+		<h1>编辑帖子</h1>
+		<hr>
+		<table class="table table-bordered table-striped" style="table-layout: fixed;">
+			<tr>
+				<td style="width:116px;background: rgba(0,0,0,0.03);">
+					{if condition='is_login()'}
+						<a href="{:url('user/space/index',['id'=>session('user_id')])}">
+							<img src="{:thumb(user('avatar'))}" class="img-responsive" alt="...">
+						</a>
+						<hr style="margin:15px 0;">
+						<p class="text-center">
+							<span class="badge text-overflow">{:user('nickname')}</span>
+						</p>
+					{else/}
+						<img src="__ROOT__/system/image/avatar.gif" class="img-responsive" alt="...">
+						<hr style="margin:15px 0;">
+						<p class="text-center">
+							<span class="badge">游客</span>
+						</p>
+						<p class="text-center">
+							<span>{$Request.ip}</span>
+						</p>
+					{/if}
+				</td>
+				<td>
+					<form id="thread_edit" onsubmit="return M.thread_edit();">
+						<div class="form-group">
+							<input type="text" class="form-control" value="{$forum.title}" readonly>
+						</div>
+						<div class="form-group">
+							<input type="text" name="title" class="form-control" value="{$thread.title}" placeholder="标题">
+						</div>
+						<div class="form-group">
+							<textarea class="form-control" name="detail" id="detail" rows="7">{$thread.body.detail}</textarea>
+							<p class="help-block">请遵守当地法律法规！</p>
+						</div>
+						<input type="hidden" name="id" value="{$thread.id}">
+						<script type="text/javascript">
+							var M = {};
+							$(function() {
+								M.initEditor = function()
+								{
+									M.loadJS("__ROOT__/third/xheditor/xheditor-1.2.2.min.js",function(){
+										M.loadJS('__ROOT__/third/xheditor/xheditor_lang/zh-cn.js');
+										$('#detail').xheditor({
+											height:300,
+											loadCSS:'//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css',
+											upMultiple:true,
+											upLinkUrl:"{:url('forum/api/xhupload')}",
+											upLinkExt:"zip,rar,txt",
+											upImgUrl:"{:url('forum/api/xhupload')}",
+											upImgExt:"jpg,jpeg,gif,png",
+											upFlashUrl:"{:url('forum/api/xhupload')}",
+											upFlashExt:"swf",
+											upMediaUrl:"{:url('forum/api/xhupload')}",
+											upMediaExt:"avi"
+										});
+										$('#initEditor').hide();
+										$('#is_edit').val(1);
+									});
+								};
+								M.loadJS = function(url,callback,charset)
+								{
+									var script = document.createElement('script');
+									script.onload = script.onreadystatechange = function ()
+									{
+										if (script && script.readyState && /^(?!(?:loaded|complete)$)/.test(script.readyState)) return;
+										script.onload = script.onreadystatechange = null;
+										script.src = '';
+										script.parentNode.removeChild(script);
+										script = null;
+										if(callback)callback();
+									};
+									script.charset=charset || document.charset || document.characterSet;
+									script.src = url;
+									try {document.getElementsByTagName("head")[0].appendChild(script);} catch (e) {}
+								};
+								M.initEditor();
+							});
+						</script>
+						{if condition="!auth($forum,12)"}
+						<div class="form-group" id="captcha_container">
+							<input type="text" name="captcha" class="form-control" id="captcha" placeholder="请输入验证码">
+							<script>
+								var change_captcha = function(selecter){
+									var url = $(selecter).attr('src');
+									if (-1 != url.lastIndexOf('#')) {
+										url = url.substring(0, url.lastIndexOf('#'));
+									}
+									$(selecter).attr('src',url + "#" + Math.random());
+								}
+								$(function() {
+									$('#captcha').focus(function(event) {
+										if (!$('#captcha_img').length) {
+											$('#captcha').before('<img class="img-rounded img-captcha" width="200" id="captcha_img" onclick="change_captcha(\'#captcha_img\');" src="{:url('index/api/captcha')}" alt="验证码" title="点击更换验证码">')
+										}
+										$('#captcha_img').css({
+											top: $("#captcha").position().top-$('#captcha_img').height()-2,
+										});
+										$('#captcha_img').show();
+									});
+									$('#captcha_container').hover(function() {
+										$('#captcha_img').show();
+									}, function() {
+										$('#captcha_img').hide();
+									});
+								});
+							</script>
+						</div>
+						<style>
+							/*验证码*/
+							.img-captcha{
+								width: 200px;
+								display: none;
+								cursor: pointer;
+								padding: 0px;
+								position: absolute;
+								height: 50px;
+								top: -50px;
+								border:1px solid #ccc;
+								outline: 0;
+								-webkit-box-shadow: 0 5px 10px rgba(0,0,0,.3);
+								box-shadow: 0 5px 10px rgba(0,0,0,.3);
+							}
+						</style>
+						{/if}
+						<button type="submit" class="btn btn-primary">提交</button>
+						<input type="hidden" name="is_edit" id="is_edit" value="0">
+						<button type="button" class="btn btn-danger" onclick="M.initEditor();" id="initEditor">高级模式</button>
+					</form>
+					<script>
+						$(function(){
+							M.thread_edit = function(){
+								$.ajax({
+									url: '{:url('forum/thread/edit')}',
+									type: 'POST',
+									dataType: 'json',
+									data: $('#thread_edit').serialize(),
+									success:function(data){
+										if (data.code) {
+											self.location=data.url;
+										}else{
+											alert(data.msg);
+											change_captcha('#captcha_img');
+										}
+									}
+								});
+								return false;
+							};
+						});
+					</script>
+				</td>
+			</tr>
+		</table>
+	</div>
+</div>
+{include file='common/footer' /}

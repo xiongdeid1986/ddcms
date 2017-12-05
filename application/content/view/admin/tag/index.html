@@ -1,0 +1,140 @@
+{include file='ebcms@common/header' /}
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+			<h3>
+				<span>TAG管理</span>
+			</h3>
+			<p>
+				<form class="form-inline" role="form" action="{:url('index')}" method="GET">
+					<div class="form-group">
+						<input type="text" name="q" value="{:input('q')}" class="form-control" id="q" placeholder="关键字">
+					</div>
+					<div class="form-group">
+						<select class="form-control" name="recommend">
+							<option value="">不限</option>
+							<option value="1" {eq name='Request.get.recommend' value='1'}selected{/eq}>已推荐</option>
+							<option value="0" {eq name='Request.get.recommend' value='0'}selected{/eq}>未推荐</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<select class="form-control" name="order">
+							<option value="id" {eq name='Request.param.order' value='id'}selected{/eq}>ID</option>
+							<option value="count" {eq name='Request.param.order' value='count'}selected{/eq}>内容数</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<select class="form-control" name="sort">
+							<option value="desc" {eq name='Request.get.sort' value='desc'}selected{/eq}>倒序</option>
+							<option value="asc" {eq name='Request.get.sort' value='asc'}selected{/eq}>正序</option>
+						</select>
+					</div>
+					<button type="submit" class="btn btn-danger">搜索</button>
+				</form>
+			</p>
+			<div class="table-responsive">
+				<table class="table table-bordered table-hover table-ebcms">
+					<tbody>
+						<tr>
+							<th style="width: 80px;">ID</th>
+							<th style="width: 90px;">操作</th>
+							<th style="width: 90px;">样式</th>
+							<th style="width: 50px;">推荐</th>
+							<th style="width: 80px;">内容条数</th>
+							<th>标签</th>
+						</tr>
+						{php}
+							$where = [];
+							if(in_array(input('recommend'),['0','1'])){
+								$where['recommend'] = input('recommend');
+							}
+							if(input('q')){
+								$where['tag'] = ['like','%'.input('q').'%'];
+							}
+							$order = [];
+							if(input('order') && input('sort')){
+								$order[input('order')] = (input('sort')=='desc')?'desc':'asc';
+							}else{
+								$order['id'] = 'desc';
+							}
+							$data = \app\content\model\Tag::where($where) -> order($order) -> paginate(10, false, [
+								'query' => input('get.')
+							]);
+						{/php}
+						{foreach name='data' item='vo'}
+							<tr>
+								<td>
+									<label><input type="checkbox" class="ebcms-id" name="id" value="{$vo.id}">&nbsp;{$vo.id}</label>
+								</td>
+								<td>
+									{if condition="check_auth('delete')"}
+										<button type="button" class="btn btn-primary btn-sm ebcms-do" url="{:url('delete')}" data-ids='{$vo.id}' confirm="删除后不可恢复，确定删除？"><span class="glyphicon glyphicon-remove"></span></button>
+									{/if}
+									{if condition="check_auth('edit')"}
+										<a href="{:url('edit',['id'=>$vo['id']])}" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-pencil"></span></a>
+									{/if}
+								</td>
+								<td>
+									{if condition="check_auth('style')"}
+									<div class="btn-group btn-group-sm dropup">
+										<button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+											<span class="glyphicon glyphicon-bold"></span>
+										</button>
+										<div class="dropdown-menu" style="padding:5px;">
+											<div class="btn-group" style="display: inline-flex;" role="group" aria-label="...">
+												<button type="button" class="btn btn-primary ebcms-do" url="{:url('style')}" data-id='{$vo.id}' data-bold='0'>普通</button>
+												<button type="button" class="btn btn-primary ebcms-do" url="{:url('style')}" data-id='{$vo.id}' data-bold='600'>加粗</button>
+												<button type="button" class="btn btn-primary ebcms-do" url="{:url('style')}" data-id='{$vo.id}' data-bold='900'>特粗</button>
+											</div>
+										</div>
+									</div>
+									<div class="btn-group btn-group-sm dropup">
+										<button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+											<span class="glyphicon glyphicon-tint"></span>
+										</button>
+										<div class="dropdown-menu" style="padding:5px;">
+											<div class="btn-group" style="display: inline-flex;" role="group" aria-label="...">
+												<button type="button" class="btn btn-default ebcms-do" url="{:url('style')}" data-id='{$vo.id}' data-color=''>无</button>
+												<button type="button" class="btn btn-primary ebcms-do" url="{:url('style')}" data-id='{$vo.id}' data-color='#428bca'>蓝</button>
+												<button type="button" class="btn btn-success ebcms-do" url="{:url('style')}" data-id='{$vo.id}' data-color='#5cb85c'>绿</button>
+												<button type="button" class="btn btn-info ebcms-do" url="{:url('style')}" data-id='{$vo.id}' data-color='#5bc0de'>青</button>
+												<button type="button" class="btn btn-warning ebcms-do" url="{:url('style')}" data-id='{$vo.id}' data-color='#f0ad4e'>黄</button>
+												<button type="button" class="btn btn-danger ebcms-do" url="{:url('style')}" data-id='{$vo.id}' data-color='#d9534f'>红</button>
+											</div>
+										</div>
+									</div>
+									{/if}
+								</td>
+								<td>
+									{if condition="check_auth('recommend')"}
+										{eq name='vo.recommend' value='1'}
+										<button type="button" class="btn btn-danger btn-sm ebcms-do" url="{:url('recommend')}" data-ids='{$vo.id}' data-value='0'><span class="glyphicon glyphicon-thumbs-up"></span></button>
+										{else}
+										<button type="button" class="btn btn-default btn-sm ebcms-do" url="{:url('recommend')}" data-ids='{$vo.id}' data-value='1'><span class="glyphicon glyphicon-thumbs-up"></span></button>
+										{/eq}
+									{/if}
+								</td>
+								<td>{$vo.count}</td>
+								<td><a href="{$vo.url}" style="{$vo.style}" target="_blank">{$vo.tag}</a></td>
+							</tr>
+						{/foreach}
+					</tbody>
+					<tfoot>
+						<tr>
+							<td style="cursor: pointer;" onclick="$('input.ebcms-id').trigger('click');">
+								<span class="glyphicon glyphicon-check"></span> 选择
+							</td>
+							<td colspan="5">
+								<button onclick="$(this).data('ids',EBCMS.FN.getCheckedId('input.ebcms-id:checkbox:checked'));" type="button" class="btn btn-danger btn-sm ebcms-do" url="{:url('delete')}" confirm="确定批量删除？">删除</button>
+								<button onclick="$(this).data('ids',EBCMS.FN.getCheckedId('input.ebcms-id:checkbox:checked'));" type="button" class="btn btn-danger btn-sm ebcms-do" url="{:url('recommend')}" data-value="1" confirm="确定批量推荐？">推荐</button>
+								<button onclick="$(this).data('ids',EBCMS.FN.getCheckedId('input.ebcms-id:checkbox:checked'));" type="button" class="btn btn-danger btn-sm ebcms-do" url="{:url('recommend')}" data-value="0" confirm="确定批量取消推荐？">取消推荐</button>
+							</td>
+						</tr>
+					</tfoot>
+				</table>
+			</div>
+			{$data -> render()}
+		</div>
+	</div>
+</div>
+{include file='ebcms@common/footer' /}

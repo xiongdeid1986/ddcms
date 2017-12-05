@@ -1,0 +1,51 @@
+{include file='index@common/header' /}
+<div class="row">
+    <div class="col-md-9">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h1>{$content.title}</h1>
+                <div >
+                    <span>发布时间：[ {$content.create_time|date='Y-m-d H:i',###} ]&nbsp;&nbsp;</span>
+                    <span>点击：[ {$content.click} ]</span>
+                </div>
+                <hr>
+                {$content.body.body|htmlspecialchars_decode}
+                {notempty name='content.tag'}
+                    <hr>
+                    <h4><b class="text-danger">延伸阅读：{foreach name='content.tag' item='vo'} <a href="{$vo.url}">{$vo.tag}</a>{/foreach}</b></h4>
+                    <ol style="padding-left: 20px;">
+                    {php}
+                        $guanlian = $content -> relations() -> limit(10) -> select();
+                    {/php}
+                    {foreach name='guanlian' item='vo'}
+                        <li><a href="{$vo.url}">{$vo.shorttitle}</a></li>
+                    {/foreach}
+                    </ol>
+                {/notempty}
+                <hr>
+                <nav>
+                  <ul class="pager">
+                    {notempty name='content.prev'}
+                    <li class="previous"><a href="{$content.prev.url}"><span aria-hidden="true">&larr;</span> {$content.prev.title}</a></li>
+                    {else/}
+                    <li class="previous disabled"><a href="javascript:void(0);"><span aria-hidden="true">&larr;</span> 没有了</a></li>
+                    {/notempty}
+                    {notempty name='content.next'}
+                    <li class="next"><a href="{$content.next.url}">{$content.next.title} <span aria-hidden="true">&rarr;</span></a></li>
+                    {else/}
+                    <li class="next disabled"><a href="javascript:void(0);">没有了 <span aria-hidden="true">&rarr;</span></a></li>
+                    {/notempty}
+                  </ul>
+                </nav>
+                {if condition="check_app('user')"}
+                    <iframe src="{:url('user/comment/index',['group'=>'content','key'=>'content_'.$content['id'],'size'=>5,'type'=>1])}" frameborder="0" width="100%" scrolling=no height="auto" frameBorder=0></iframe>
+                {/if}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        {include file='common/side' /}
+    </div>
+
+</div>
+{include file='index@common/footer' /}

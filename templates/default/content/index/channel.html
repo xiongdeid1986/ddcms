@@ -1,0 +1,69 @@
+{include file='index@common/header' /}
+<div class="row">
+    <div class="col-md-9">
+        {notempty name='channel.sub_ids'}
+            <div class="row">
+                {php}
+                    $data = \app\content\model\Channel::where(['pid'=>$channel['id'],'status'=>1,'eb_url'=>'']) -> order('sort desc,id asc') -> select();
+                {/php}
+                {foreach name='data' item='vo'}
+                    <div class="col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading"><a href="{$vo.url}">{$vo.title}</a></div>
+                            <div class="list-group">
+                            {php}
+                                $lists = $vo -> lists() -> order('id desc') -> limit(5) -> select();
+                            {/php}
+                            {foreach name='lists' item='vs'}
+                                <a href="{$vs.url}" class="list-group-item" style="{$vs.style}"> <strong>{$key+1}</strong>. {$vs.shorttitle|mb_substr=0,24}</a>
+                            {/foreach}
+                            </div>
+                        </div>
+                    </div>
+                {/foreach}
+            </div>
+        {else/}
+            <style>
+                .artilelist .media{
+                    padding: 20px 0;
+                    border-bottom: 1px solid #ddd;
+                }
+
+                .artilelist .media .media-left img{
+                    border: 1px solid #cccccc;
+                    padding: 8px;
+                    background: #f1f1f1;
+                }
+                .artilelist .media .desc{
+                    padding: 10px;
+                    border: 1px #D6D6D6 dashed;
+                    background: #F5F5F5;
+                    margin: 10px 0px;
+                }
+            </style>
+            <ul class="media-list artilelist">
+                {php}
+                    $lists = $channel -> lists() -> order('id desc') -> paginate(5);
+                {/php}
+                {foreach name='lists' item='vo'}
+                <li class="media">
+                    <div class="media-left hidden-xs hidden-sm">
+                        <a href="{$vo.url}">
+                            <img class="media-object" src="{$vo.thumb|thumb=200,160,3}" width="200" height="160" alt="{$vo.title}">
+                        </a>
+                    </div>
+                    <div class="media-body">
+                        <h3 class="media-heading "><strong><a href="{$vo.url}" class="text-danger">{$vo.shorttitle}</a></strong></h3>
+                        <p class="desc">{$vo.description}</p>
+                    </div>
+                </li>
+                {/foreach}
+            </ul>
+            {$lists -> render()}
+        {/notempty}
+    </div>
+    <div class="col-md-3">
+        {include file='common/side' /}
+    </div>
+</div>
+{include file='index@common/footer' /}

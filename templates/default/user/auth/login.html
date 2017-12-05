@@ -1,0 +1,67 @@
+{include file='common/header'/}
+<div class="row">
+    <div class="col-md-3">
+        {include file='auth/left'/}
+    </div>
+    <div class="col-md-9">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h1>
+                    <div class="btn-group pull-right">
+                        <a href="{:url('user/auth/login')}" class="btn btn-primary">用户登录</a>
+                        <a href="{:url('user/auth/reg')}" class="btn btn-primary">会员注册</a>
+                        <a href="{:url('user/auth/password')}" class="btn btn-primary">找回密码</a>
+                    </div>
+                    用户登录
+                </h1>
+                <hr>
+                <form class="form-horizontal well" id="login_form" method="post" onsubmit="return M.login();" action="{:url('user/auth/login')}">
+                    <div class="form-group">
+                        <label for="email" class="col-sm-2 control-label">邮箱</label>
+                        <div class="col-sm-10">
+                            <input name="email" type="text" class="form-control" id="email">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="col-sm-2 control-label">密码</label>
+                        <div class="col-sm-10">
+                            <input name="password" type="password" class="form-control" id="password">
+                        </div>
+                    </div>
+                    {if condition="false !== eb_config('user.login.captcha')"}
+                        {include file='common/captcha' /}
+                    {/if}
+                    <input type="hidden" name="go" value="{:input('go')}">
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="submit" class="btn btn-primary" >提交</button>
+                        </div>
+                    </div>
+                </form>
+                <script>
+                    var M={};
+                    $(function(){
+                        M.login = function(){
+                            $.ajax({
+                                url: '{:url('user/auth/login')}',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: $('#login_form').serialize(),
+                                success:function(data){
+                                    alert(data.msg);
+                                    if (data.code) {
+                                        self.location=data.url;
+                                    }else{
+                                        change_captcha('#captcha_img');
+                                    }
+                                }
+                            });
+                            return false;
+                        };
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+{include file='common/footer' /}

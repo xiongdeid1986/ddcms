@@ -1,0 +1,89 @@
+{include file='common/header' /}
+<div class="row">
+    <div class="col-md-3">
+        {include file='common/left' /}
+    </div>
+    <div class="col-md-9">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h1>
+                    <div class="btn-group btn-group-sm pull-right">
+                        <a href="{:url('user/index/message')}" class="btn btn-primary {if condition="input('?isread')===false"}active{/if}">全部</a>
+                        <a href="{:url('user/index/message?isread=0')}" class="btn btn-primary {if condition="input('?isread') && input('isread')==0"}active{/if}">未读</a>
+                        <a href="{:url('user/index/message?isread=1')}" class="btn btn-primary {if condition="input('?isread') && input('isread')==1"}active{/if}">已读</a>
+                    </div>
+                    <span>我的消息</span>
+                </h1>
+                <hr>
+                <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                  {foreach name='lists' item='vo'}
+                  <div class="panel panel-default">
+                    {eq name='vo.isread' value='0'}
+                    <div class="panel-heading">
+                        <button class="btn btn-default btn-xs pull-right" onclick="M.del('{$vo.id}',this);">删除</button>
+                        <span>[ <span class="text-danger">{$vo.topic}</span> ] <a href="#collapse{$key}" data-toggle="collapse" onclick="M.read('{$vo.id}',this);" style="font-weight: bolder;">{$vo.title}</a></span>
+                    </div>
+                    {else/}
+                    <div class="panel-heading" >
+                        <button class="btn btn-default btn-xs pull-right" onclick="M.del('{$vo.id}',this);">删除</button>
+                        <span>[ <span class="text-danger">{$vo.topic}</span> ] <a href="#collapse{$key}" data-toggle="collapse">{$vo.title}</a></span>
+                    </div>
+                    {/eq}
+                    <div id="collapse{$key}" class="panel-collapse collapse">
+                      <div class="panel-body">
+                        {$vo.content}
+                      </div>
+                    </div>
+                  </div>
+                  {/foreach}
+                </div>
+                <script>
+                    var M = {};
+                    $(function() {
+                        M.read = function(id,el){
+                            $.ajax({
+                                url: '{:url('user/index/message')}',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    do:'read',
+                                    ids:id,
+                                },
+                                success:function(res){
+                                    if (res.code) {
+                                        $(el).css('font-weight', 'normal');
+                                        $(el).attr('onclick', '');
+                                    }
+                                },
+                                error:function(){
+                                    alert('服务器错误！请稍后再试！');
+                                }
+                            });
+                        };
+                        M.del = function(id,el){
+                            $.ajax({
+                                url: '{:url('user/index/message')}',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    do:'delete',
+                                    ids:id,
+                                },
+                                success:function(res){
+                                    if (res.code) {
+                                        $(el).parent().parent().hide('slow');
+                                    }
+                                },
+                                error:function(){
+                                    alert('服务器错误！请稍后再试！');
+                                }
+                            });
+                        };
+                    });
+                </script>
+                {$page}
+            </div>
+        </div>
+    </div>
+</div>
+{include file='common/footer' /}

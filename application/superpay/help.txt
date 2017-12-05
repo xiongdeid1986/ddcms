@@ -1,0 +1,53 @@
+{if condition="check_app('superpay')"}
+    {php}
+        $buy = new \app\superpay\Buy();
+        //必填
+        $buy -> sign = 'contenthao_2'; //唯一标志
+        $buy -> price = '10'; //价格
+        $buy -> currency = 'jifen'; //货币类型
+        $buy -> title = '购买一款衣服'; //说明
+
+        //选填
+        $buy -> code_expire = 60; //支付代码有效期 单位秒 默认60秒
+        $buy -> expire = 0; //支付有效期 过期需要重新支付 0为无限期 默认无限期
+    {/php}
+    {if condition="$buy -> need_buy"}
+    <div class="alert alert-danger alert-dismissible fade in" role="alert">
+        <p style="font-size:2em;">查看隐藏内容您需要支付 <strong>{$buy->price}</strong> {$buy->currency_name}</p>
+        <hr>
+        <p>
+            <script>
+                var _M_ = {};
+                $(function() {
+                    _M_.buy = function(price,currency_name){
+                        if (window.confirm("您确定支付 " + price + " " + currency_name + " 吗？")) {
+                            $.ajax({
+                                url: '{$buy->url}',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    code: '{$buy -> code}'
+                                },
+                                success:function(data){
+                                    alert(data.msg);
+                                    if (data.code) {
+                                        self.location=data.url;
+                                    }
+                                },
+                                error:function(){
+                                    alert('服务器错误，请稍后再试！');
+                                }
+                            });
+                        }
+                    }
+                });
+            </script>
+            <button type="button" class="btn btn-danger" onclick="_M_.buy('{$buy->price}','{$buy->currency_name}');">立即支付</button>
+            <button type="button" class="btn btn-default">如何获取{$buy->currency_name}？</button>
+        </p>
+        {if condition="$buy->code_expire"}<p>请在{$buy->code_expire}秒内完成支付！</p>{/if}
+    </div>
+    {else/}
+        <p>您支付过啦！</p>
+    {/if}
+{/if}

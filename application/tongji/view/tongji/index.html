@@ -1,0 +1,72 @@
+{include file='ebcms@common/header' /}
+<div class="col-md-12">
+    <h3>
+        <a href="{:url('index')}" class="text-danger">浏览日志</a>
+        <a href="{:url('tj')}">页面统计</a>
+    </h3>
+    <hr>
+    {php}
+        $_where = [];
+        if(input('url')){
+            $_where = ['url'=>input('url')];
+        }
+        if(input('ip')){
+            $_where = ['ip'=>input('ip')];
+        }
+        if(input('title')){
+            $_where = ['title'=>input('title')];
+        }
+        if(input('from')){
+            $_where = ['from'=>input('from')];
+        }
+        $data = \app\tongji\model\Tongji::order('id desc') -> where($_where) -> paginate(30,false,['query'=>input('get.')]);
+    {/php}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover table-ebcms">
+            <tbody>
+                <tr>
+                    <th style="width:70px;">id</th>
+                    <th>链接</th>
+                    <th>ip</th>
+                    <th>用户ID</th>
+                    <th>时间</th>
+                    <th>标题</th>
+                    <th>来源</th>
+                </tr>
+                {foreach name='data' item='vo'}
+                    <tr>
+                        <td>{$vo.id}</td>
+                        <td><a href="{:url('index')}?url={$vo.url}" title="{$vo.url}">{$vo.url|mb_substr=0,60}</a></td>
+                        <td><a href="{:url('index')}?ip={$vo.ip}">{$vo.ip}</a></td>
+                        <td><a href="{:url('index')}?user_id={$vo.user_id}">{$vo.user_id}</a></td>
+                        <td>{$vo.create_time|date='Y-m-d H:i:s',###}</td>
+                        <td><a href="{:url('index')}?title={$vo.title}" title="{$vo.title|addslashes}">{$vo.title|mb_substr=0,40}</a></td>
+                        <td><a href="{:url('index')}?from={$vo.from}" title="{$vo.from|addslashes}">{$vo.from|mb_substr=0,40}</a></td>
+                    </tr>
+                {/foreach}
+            </tbody>
+            {if condition="check_auth('delete')"}
+            <tfoot>
+                <tr>
+                    <th>删除</th>
+                    <td colspan="6">
+                        <a class="ebcms-do" style="cursor: pointer;" url="{:url('delete')}" data-day="3" confirm="删除后不可恢复，确定删除？">三天之前</a>
+                        <a class="ebcms-do" style="cursor: pointer;" url="{:url('delete')}" data-day="7" confirm="删除后不可恢复，确定删除？">一周之前</a>
+                        <a class="ebcms-do" style="cursor: pointer;" url="{:url('delete')}" data-day="14" confirm="删除后不可恢复，确定删除？">两周之前</a>
+                        <a class="ebcms-do" style="cursor: pointer;" url="{:url('delete')}" data-day="21" confirm="删除后不可恢复，确定删除？">三周之前</a>
+                        <a class="ebcms-do" style="cursor: pointer;" url="{:url('delete')}" data-day="28" confirm="删除后不可恢复，确定删除？">四周之前</a>
+                        <a class="ebcms-do" style="cursor: pointer;" url="{:url('delete')}" data-day="60" confirm="删除后不可恢复，确定删除？">两个月之前</a>
+                        <a class="ebcms-do" style="cursor: pointer;" url="{:url('delete')}" data-day="90" confirm="删除后不可恢复，确定删除？">三个月之前</a>
+                        <a class="ebcms-do" style="cursor: pointer;" url="{:url('delete')}" data-day="120" confirm="删除后不可恢复，确定删除？">四个月之前</a>
+                        <a class="ebcms-do" style="cursor: pointer;" url="{:url('delete')}" data-day="150" confirm="删除后不可恢复，确定删除？">五个月之前</a>
+                        <a class="ebcms-do" style="cursor: pointer;" url="{:url('delete')}" data-day="180" confirm="删除后不可恢复，确定删除？">六个月之前</a>
+                        <a class="ebcms-do" style="cursor: pointer;" url="{:url('delete')}" data-day="365" confirm="删除后不可恢复，确定删除？">一年之前</a>
+                    </td>
+                </tr>
+            </tfoot>
+            {/if}
+        </table>
+    </div>
+    {$data -> render()}
+</div>
+{include file='ebcms@common/footer' /}

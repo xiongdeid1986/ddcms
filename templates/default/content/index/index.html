@@ -1,0 +1,206 @@
+{include file='index@common/header' /}
+<div class="row">
+    <div class="col-md-5 hidden-xs hidden-sm">
+        <!-- 轮播 -->
+        {php}
+            $content = new \app\content\model\Content();
+            $data = $content -> attrlist('幻灯',4);
+        {/php}
+        <style>
+            .caption{
+                width: 100%;
+                background: rgba(0, 0, 0, 0.48);
+                color: #fff;
+                position: absolute;
+                bottom: 0;
+                padding: 7px;
+            }
+            .carousel-indicators{
+                bottom: 0px !important;
+                right: 0 !important;
+                padding: 7px !important;
+                margin: 0 !important;
+                left: initial;
+                width: initial;
+            }
+        </style>
+        {notempty name="data"}
+            <div id="carousel-example-generic" class="carousel slide" style="border: 1px solid #ddd;" data-ride="carousel">
+
+                <ol class="carousel-indicators">
+                    {foreach name='data' item='vo'}
+                        <li data-target="#carousel-example-generic" data-slide-to="{$key}" {eq name="key" value="0"}class="active"{/eq}></li>
+                    {/foreach}
+                </ol>
+
+                <div class="carousel-inner" role="listbox">
+                    {foreach name='data' item='vo'}
+                        <div class="item {eq name="key" value="0"}active{/eq}">
+                            <a href="{$vo.url}" target="_blank">
+                            <img src="{$vo.thumb|thumb=800,600}" width="800" height="600" alt="{$vo.title}" class="img-responsive" style="width: 500px;height: 350px;">
+                            <div class="caption">
+                                {$vo.title}
+                            </div>
+                            </a>
+                        </div>
+                    {/foreach}
+                </div>
+            </div>
+        {/notempty}
+    </div>
+    <div class="col-md-7">
+        <!-- 头条 -->
+        <div class="panel panel-default">
+            <div class="panel-body">
+                {php}
+                    $content = new \app\content\model\Content();
+                    $data = $content -> attrlist('头条',3);
+                {/php}
+                {foreach name="data" item="vo" }
+                    {lt name='key' value='1'}
+                        <div class="media">
+                            <div class="media-left">
+                                <a href="{$vo.url}" target="_blank">
+                                    <img class="media-object" src="{$vo.thumb|thumb=100,100}" width="100" height="100" alt="...">
+                                </a>
+                            </div>
+                            <div class="media-body">
+                                <h3 class="media-heading"><strong><a href="{$vo.url}" target="_blank" class="text-danger" style="{$vo.style}">{$vo.title|mb_substr=0,14}</a></strong></h3>
+                                <p>{$vo.description|mb_substr=0,100}</p>
+                            </div>
+                        </div>
+                    {else /}
+                        <div class="media">
+                            <div class="media-body">
+                                <h4 class="media-heading "><strong><a href="{$vo.url}" target="_blank" style="{$vo.style}">{$vo.title}</a></strong></h4>
+                                <p class="text-muted">{$vo.description|mb_substr=0,120}</p>
+                            </div>
+                        </div>
+                    {/lt}
+                {/foreach}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-9">
+        <div class="row">
+            {if condition="check_app('mbzs')"}
+            <div class="col-md-12">
+                <p>
+                    <img src="{:\\app\\mbzs\\Zs::get('index_panel_ad','首页栏目上方')}" alt="" class="img-responsive" style="width:100%;">
+                </p>
+            </div>
+            {/if}
+            {php}
+                $data = \app\content\model\Channel::where(['pid'=>0,'status'=>1,'eb_url'=>'']) -> order('sort desc,id asc') -> select();
+            {/php}
+            {foreach name='data' item='vo'}
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        {empty name='vo.subs'}
+                            <div class="panel-heading">
+                                <a href="{$vo.url}">{$vo.title}</a>
+                            </div>
+                            <div class="list-group">
+                            {eq name='vo.eb_url' value=''}
+                                {php}
+                                    $lists = $vo -> lists() -> limit(5) -> order('id desc') -> select();
+                                {/php}
+                                {foreach name='lists' item='vs'}
+                                <a href="{$vs.url}" class="list-group-item" style="{$vs.style}"> <strong>{$key+1}</strong>. {$vs.shorttitle|mb_substr=0,24}</a>
+                                {/foreach}
+                            {/eq}
+                            </div>
+                        {else/}
+                            <div class="panel-heading">
+                                <div class="btn-group btn-group-xs pull-right channel_tab" role="group" aria-label="...">
+                                    {foreach name='vo.subs' item='subcate'}
+                                    {eq name='subcate.eb_url' value=''}
+                                    <span type="button" class="btn btn-default" data-id="{$subcate.id}">{$subcate.title}</span>
+                                    {/eq}
+                                    {/foreach}
+                                </div>
+                                <a href="{$vo.url}">{$vo.title}</a>
+                            </div>
+                            <div class="list-group">
+                            {foreach name='vo.subs' item='subcate'}
+                            {eq name='subcate.eb_url' value=''}
+                            <div id="content_channel_{$subcate.id}" style="display:none;">
+                                {php}
+                                    $lists = $subcate -> lists() -> limit(5) -> order('id desc') -> select();
+                                {/php}
+                                {foreach name='lists' item='vs'}
+                                <a href="{$vs.url}" class="list-group-item" style="{$vs.style}"> <strong>{$key+1}</strong>. {$vs.shorttitle|mb_substr=0,24}</a>
+                                {/foreach}
+                            </div>
+                            {/eq}
+                            {/foreach}
+                            </div>
+                        {/empty}
+                    </div>
+                </div>
+            {/foreach}
+        </div>
+        <script>
+            $(function() {
+                $('.channel_tab span').bind('click', function(event) {
+                    $(this).addClass('active').siblings().removeClass('active');
+                    var id = $(this).data('id');
+                    $('#content_channel_'+id).show().siblings().hide();
+                });
+                $('.channel_tab span').hover(function() {
+                    $(this).addClass('active').siblings().removeClass('active');
+                    var id = $(this).data('id');
+                    $('#content_channel_'+id).show().siblings().hide();
+                });
+                $.each($('.channel_tab'), function(index, val) {
+                    $(this).children('span:eq(0)').click();
+                });
+            });
+        </script>
+    </div>
+    <div class="col-md-3">
+        <!-- 搜索 -->
+        <div class="panel">
+            <form method="get" action="{:url('content/search/index')}" role="search">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" value="" placeholder="Search">
+                    <span class="input-group-btn">
+                        <button class="btn btn-danger" type="submit">搜索</button>
+                    </span>
+                </div>
+            </form>
+        </div>
+        <!-- 滚动新闻 -->
+        <div class="panel panel-default">
+            <div class="panel-heading">滚动新闻</div>
+            <div class="list-group">
+                {php}
+                    $data = \app\content\model\Content::where(['status'=>1]) -> order('id desc') -> limit(4) -> select();
+                {/php}
+                {foreach name='data' item='vo'}
+                    <a href="{$vo.url}" class="list-group-item">{$vo.shorttitle}</a>
+                {/foreach}
+            </div>
+        </div>
+        {if condition="check_app('mbzs')"}
+        <p>
+            <img src="{:\\app\\mbzs\\Zs::get('side_ad','侧栏广告')}" alt="">
+        </p>
+        {/if}
+        <!-- 热门标签 -->
+        <div class="panel panel-default">
+            <div class="panel-heading">推荐标签</div>
+            <div class="panel-body">
+                {php}
+                    $data = \app\content\model\Tag::order('recommend desc,count desc,id desc') -> limit(20) -> select();
+                {/php}
+                {foreach name='data' item='vo'}
+                <a href="{$vo.url}" style="{$vo.style}">{$vo.tag}({$vo.count})</a>  
+                {/foreach}
+            </div>
+        </div>
+    </div>
+</div>
+{include file='index@common/footer' /}

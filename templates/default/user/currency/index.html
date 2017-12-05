@@ -1,0 +1,48 @@
+{include file='common/header' /}
+<div class="row">
+    <div class="col-md-3">
+        {include file='common/left' /}
+    </div>
+    <div class="col-md-9">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h1>账户概况</h1>
+                <hr>
+                {php}
+                    $currencys = \ebcms\Config::get('user.base.currency');
+                    $currency = \app\user\model\Currency::get(\think\Session::get('user_id'));
+                    $tongji = $currency['tongji'];
+                {/php}
+                <table class="table table-bordered">
+                    <tr>
+                        <th>项目</th>
+                        {foreach name='currencys' item='vo'}
+                        <th>{$vo}</th>
+                        {/foreach}
+                    </tr>
+                    <tr>
+                        <th>累计存入：</th>
+                        {foreach name='currencys' item='vo'}
+                        <td>{$tongji[$key]['in']}</td>
+                        {/foreach}
+                    </tr>
+                    <tr>
+                        <th>累计支出：</th>
+                        {foreach name='currencys' item='vo'}
+                        <td>{$tongji[$key]['out']}</td>
+                        {/foreach}
+                    </tr>
+                    <tr>
+                        <th>账户余额：</th>
+                        {foreach name='currencys' item='vo'}
+                        <td>{$currency[$key]}</td>
+                        {/foreach}
+                    </tr>
+                </table>
+                <!-- <br> -->
+                <a class="btn btn-success" href="{:url('user/currency/log')}">账户流水</a>
+            </div>
+        </div>
+    </div>
+</div>
+{include file='common/footer' /}
