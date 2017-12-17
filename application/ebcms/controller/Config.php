@@ -19,19 +19,55 @@ class Config extends \app\ebcms\controller\Common
         return $arr['str'];
     }
 
+    public function addConfig(){
+        if( request()->isPost() ){
+
+            dump($_POST);
+
+        }
+    }
+
+    /*展示编辑页面*/
+    public function form_edit($configcate=array(),$configs=null){
+        if(empty($configcate)){
+            $configcate = \think\Db::name('configcate')->where(['name' => input('name'),'status'=>1])->find();
+        }
+        if(  $configs === null  ){
+            $_where = array(
+                'status' => 1,
+                'category_id' => array('eq', $configcate['id']),
+            );
+            $configs = \think\Db::name('config') -> where($_where)->order('sort desc,id asc')->select();
+        }
+        $groups = array();
+        if(empty($configs)){
+            array_push($groups,$configcate['title']);
+        }else{
+            foreach($configs as $k => $v){
+                array_push($groups,$configcate['group']);
+            }
+        }
+        $groups = array_unique($groups);
+        $this->assign('category_id', $configcate['id']);
+        $this->assign('category_title', $configcate['title']);
+        $this->assign('groups', $groups);
+        return $this->fetch('common/form_edit');
+    }
+
     public function setting()
     {
         if (request()->isGet()) {
 
-            if (!$x = \think\Db::name('configcate')->where(['name' => input('name'),'status'=>1])->find()) {
-                $this->error('暂无配置项');
+            if (!$x = \think\Db::name('configcate')->where(['name' => input('name'),'status'=>1])->find() ) {
+                //$this->error('暂无配置项');
             }
 
             $_where = array(
                 'status' => 1,
                 'category_id' => array('eq', $x['id']),
             );
-            if ($configs = \think\Db::name('config') -> where($_where)->order('sort desc,id asc')->select()) {
+            $configs = \think\Db::name('config') -> where($_where)->order('sort desc,id asc')->select();
+            if ($configs) {
                 $ids = [];
                 foreach ($configs as $key => $item) {
                     $ids[] = $item['id'];
@@ -86,7 +122,7 @@ class Config extends \app\ebcms\controller\Common
                 $this->assign('data', $configs);
                 return $this->fetch('common/form');
             } else {
-                $this->error('暂无配置项');
+                return $this->form_edit($x,$configs);
             }
         } elseif (request()->isPost()) {
             $data = input('config/a');

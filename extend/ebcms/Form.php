@@ -4,7 +4,6 @@ namespace ebcms;
 class Form
 {
     use \traits\controller\Jump;
-
     public static function fetch($data = array(), $config = array())
     {
         $form = self::get($data, $config);
@@ -24,7 +23,6 @@ class Form
     // 返回表单
     public static function get($data = array(), $config = array())
     {
-
         $res = [];
         $config['formname'] = isset($config['formname']) ? $config['formname'] : request()->module() . '_' . request()->controller() . '_' . request()->action();
         $config['action'] = isset($config['action']) ? $config['action'] : request()->module() . '/' . request()->controller() . '/' . request()->action();
@@ -34,7 +32,7 @@ class Form
         $sorts = [];
         $groups = [];
         $groups_sort = [];
-        if ($form = \think\Db::name('form')->where($_where)->find()) {
+        if ($form = \think\Db::name('form') -> where($_where) -> find()) {
             $form['action'] = \think\Url::build(strtolower($config['action']));
             $form['unique'] = md5(uniqid().$form['id']);
             $_where = [
@@ -42,7 +40,6 @@ class Form
             ];
             $_fields = \app\ebcms\model\Formfield::where($_where)->order('sort desc,id asc')->select();
             foreach ($_fields as $key => $obj) {
-                // 字段配置
                 $tmp = [];
                 $tmp['id'] = $obj['id'];
                 $tmp['config'] = array_merge(['disabled'=>0,'readonly'=>0],(Array)$obj['config']);
@@ -51,7 +48,6 @@ class Form
                 $tmp['sort'] = $obj['sort'];
                 $tmp['type'] = substr($obj['type'], 5);
                 $tmp['unique'] = md5(uniqid().$obj['id']);
-                // 字段名称
                 if ($obj['subtable'] && $obj['extfield']) {
                     $tmp['field'] = $obj['subtable'] . '[' . $obj['extfield'] . ']' . '[' . $obj['name'] . ']';
                 } elseif ($obj['extfield']) {
@@ -61,7 +57,6 @@ class Form
                 } else {
                     $tmp['field'] = $obj['name'];
                 }
-                // 字段值
                 switch ($obj['defaultvaluetype']) {
                     case '0':
                         $tmp['value'] = $obj['defaultvalue'];
@@ -96,14 +91,12 @@ class Form
                 $groups_sort[$obj['group']] = isset($groups_sort[$obj['group']])?max($groups_sort[$obj['group']],$obj['sort']):$obj['sort'];
             }
 
-            // 扩展字段
             if (isset($config['ext_id']) && $config['ext_id']) {
                 $_where = array(
                     'category_id' => array('eq', $config['ext_id']),
                 );
                 if ($extfields = \app\ebcms\model\Extendfield::where($_where)->order('sort desc,id asc')->select()) {
                     foreach ($extfields as $key => $obj) {
-                        // 字段配置
                         $tmp = [];
                         $tmp['id'] = $obj['id'];
                         $tmp['config'] = array_merge(['disabled'=>0,'readonly'=>0],(Array)$obj['config']);
@@ -113,13 +106,11 @@ class Form
                         $tmp['sort'] = $obj['sort'];
                         $tmp['type'] = substr($obj['type'], 5);
                         $tmp['unique'] = md5(uniqid().$obj['id']);
-                        // 字段名称
                         if (isset($config['ext_table']) && $config['ext_table']) {
                             $tmp['field'] = $config['ext_table'] . '[ext]' . '[' . $obj['name'] . ']';
                         } else {
                             $tmp['field'] = 'ext[' . $obj['name'] . ']';
                         }
-                        // 字段值
                         $tmp['value'] = '';
                         if ($data) {
                             if (isset($config['ext_table']) && $config['ext_table']) {
@@ -135,7 +126,6 @@ class Form
                     }
                 }
             }
-            // 排序
             array_multisort(array_values($groups_sort), SORT_DESC, $groups);
             foreach ($groups as $key => $value) {
                 $groups[$key] = self::group_sort($value);

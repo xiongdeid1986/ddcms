@@ -45,8 +45,8 @@
     <div class="container">
         <div class="col-lg-12 col-md-12 col-sm-12">
             {php}
-            $Channel = \app\content\model\Channel::where(['status'=>1,'id'=>4]) -> order('sort desc,id asc') -> select();
-            $Channel = \ebcms\Tree::tree($Channel);
+                $Channel = \app\content\model\Channel::where(['status'=>1,'id'=>4]) -> order('sort desc,id asc') -> select();
+                $Channel = \ebcms\Tree::tree($Channel);
             {/php}
             {foreach name='$Channel' item='channel_data' } <a href="{$channel_data.url}"><img src="/assets/images/discounts.jpg" style="width: 100%;" / ></a>{/foreach}
         </div>
@@ -54,7 +54,7 @@
 </section>
 <!--案例中心-->
 {php}
-$data = \app\content\model\Channel::where(['pid'=>2,'status'=>1,'eb_url'=>'']) -> order('sort desc,id asc') -> select();
+    $data = \app\content\model\Channel::where(['pid'=>2,'status'=>1,'eb_url'=>'']) -> order('sort desc,id asc') -> select();
 {/php}
 <section class="trainings" style="margin-bottom: 80px;">
     <div class="container">

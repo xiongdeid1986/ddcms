@@ -5,9 +5,9 @@ class Store extends \app\ebcms\controller\Common
 
     public function index()
     {
-        if (request()->isGet()) {
+        if ( request()->isGet() ) {
             return $this->fetch();
-        } elseif (request()->isPost()) {
+        } elseif ( request()->isPost() ) {
             $param = [
                 'page'  =>  input('page'),
                 'rows'  =>  input('rows'),
@@ -29,13 +29,11 @@ class Store extends \app\ebcms\controller\Common
             $param = [
                 'app_id' => $app_id
             ];
-            if ($myapp = \think\Db::name('app')->where('app_id', $app_id)->find()) {
+            if ($myapp = \think\Db::name('app') ->where('app_id', $app_id) ->find()) {
                 $param['version']   =   $myapp['version'];
             }
             $res = \ebcms\Server::store('appInfo', $param);
             if ($res['code']) {
-
-                // 新安装的时候 检测是否冲突
                 if (!$myapp) {
                     if ($app = \think\Db::name('app') -> where('name', $res['data']['name']) -> find()) {
                         $this -> error('和【' . $app['title'].'】存在冲突，无法安装！');
