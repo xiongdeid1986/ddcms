@@ -466,27 +466,17 @@
         _debug('-------from start--------');
 
         var form_ = $(f).get(0);
-        interior['form'] = form_;/*报错时需要用到,默认在表单上面报错.*/
-        var submit_ = true;
-        var sendtype = $(form_).attr('method');
-        if(!sendtype){
-            sendtype ="post";
-        }
-        sendtype = sendtype.toLowerCase()
-        var pwd='';
-        var repwd='';
-        var repwdObj = null;
-        var names_ = $(f).find('[name]').toArray().reverse();
-        var form_data;
-        var lastEle = null;
-        var editClass = is_edit('editClass');//带有class值的 div为编辑器.
+        var submit_ = true,
+            sendtype = ( $(form_).attr('method') ? $(form_).attr('method') : "post" ).toLowerCase();
+        var pwd='',
+            repwd='',
+            repwdObj = null,
+            names_ = $(f).find('[name]').toArray().reverse(),
+            form_data = ( sendtype == 'post' ) ? new FormData(form_) : $(form_).serialize(),
+            lastEle = null,
+            editClass = is_edit('editClass');//带有class值的 div为编辑器.
         _debug(form_);
-        if(sendtype == 'post'){
-            form_data = new FormData(form_);/*新建一个Form用于提交*/
-        }
-        if(sendtype == 'get'){
-            form_data = $(form_).serialize();/*新建一个Form用于提交*/
-        }
+        interior['form'] = form_;/*报错时需要用到,默认在表单上面报错.*/
         $(names_).each(function(a,b){
             /*判断未填写*/
             var is_skip = !InArr(interior.skip,$(b).attr('name')) && !InArr(interior.skip,$(b).attr('id')),/*跳过*/
@@ -560,9 +550,9 @@
                     CallBackFn(interior,data);
                 },
                 error:function(err){//报错后自动处理
+                    console.log(err);
                     interior["ajaxErrorCallback"] ? interior["ajaxErrorCallback"](err) : (function(){
                         Info(err,'danger');
-                        console.log(err);
                     })();
                 }
             };
