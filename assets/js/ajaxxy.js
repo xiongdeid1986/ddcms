@@ -300,7 +300,6 @@
                         t="";
                     }
                     console.log(arg[i]);
-
                 }
             }
         }
@@ -468,11 +467,15 @@
         var form_ = $(f).get(0);
         var submit_ = true,
             sendtype = ( $(form_).attr('method') ? $(form_).attr('method') : "post" ).toLowerCase();
+            function PostFormData(form){
+              var tables = $(form).serializeArray();
+              console.log(tables)
+            }
         var pwd='',
             repwd='',
             repwdObj = null,
             names_ = $(f).find('[name]').toArray().reverse(),
-            form_data = ( sendtype == 'post' ) ? new FormData(form_) : $(form_).serialize(),
+            form_data = ( sendtype == 'post' ) ? new FormData() : $(form_).serialize(),
             lastEle = null,
             editClass = is_edit('editClass');//带有class值的 div为编辑器.
         _debug(form_);
@@ -504,7 +507,7 @@
                 _debug('有个性编辑器...',$(b).attr('name'));
                 /*自带的编辑器,不是读取val而是html()*/
                 if(sendtype == 'post'){
-                    form_up.append($(b).attr('name'), $(b).html());
+                    form_data.append($(b).attr('name'), $(b).html());
                 }
                 if(sendtype == 'get'){
                     getData[$(b).attr('name')] = $(b).html();
@@ -516,12 +519,21 @@
             _debug('---------表单值需要验证,为空无法提交----------',lastEle);
             var name_ = $(lastEle).attr('name'),alert_;
             try{
-                alert_ = $('[for='+name_+']').html( );
-                PrivateONECreateInfo('请先填写 : '+alert_);
+                alert_ = $('[for="'+name_+'"]').html();
             }catch(_e){
-                PrivateONECreateInfo('有表单值为空， 请先填写');
                 console.log(_e);
+                alert_ = '';
             }
+            if(!alert_){
+              alert_ = $(lastEle).attr('placeholder');
+              if(!alert_){
+                alert_= name_;
+              }
+              if(!alert_){
+                alert_="该表单不允许为空.";
+              }
+            }
+            PrivateONECreateInfo('请先填写 : '+alert_);
             return false;
         }
 
@@ -574,6 +586,7 @@
             _debug('------------'+sendtype+'提交 ['+submit_qeust["text"]+'][提交数据:'+submit_qeust["up_data_name"]+']-------------',submit_qeust["data"]);
             console.log("-------------test--------------------");
             console.log(ajaxOption);
+            $('[data-alertinfo="true"]').remove();
             $.ajax(ajaxOption);
             return false;
         }

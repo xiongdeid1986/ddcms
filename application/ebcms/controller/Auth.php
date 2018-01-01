@@ -30,7 +30,6 @@ class Auth extends Controller
                     $this->error('验证码错误！');
                 }
             }
-            
             // 读取该账户
             $where = array(
                 'email' => input('email'),
