@@ -467,15 +467,11 @@
         var form_ = $(f).get(0);
         var submit_ = true,
             sendtype = ( $(form_).attr('method') ? $(form_).attr('method') : "post" ).toLowerCase();
-            function PostFormData(form){
-              var tables = $(form).serializeArray();
-              console.log(tables)
-            }
         var pwd='',
             repwd='',
             repwdObj = null,
             names_ = $(f).find('[name]').toArray().reverse(),
-            form_data = ( sendtype == 'post' ) ? new FormData() : $(form_).serialize(),
+            form_data = ( sendtype == 'post' ) ? new FormData() : {},
             lastEle = null,
             editClass = is_edit('editClass');//带有class值的 div为编辑器.
         _debug(form_);
@@ -503,14 +499,73 @@
                     }
                 }
             }
-            if(InArr(editClass,$(b).attr('class'))){
+
+            /*post 和 get的取值方式,
+            1.如果是从带有编辑器的元素中取值, 则检测该元素的编辑class标签,该标签会把普通元素变成editor
+            2.如果不是编辑器,则分别取值,POST的值添加到new FormData()中.主要是为了提交给POST时不失去一些元素,比如文件.
+            3.get提交则直接取各元素的value则可.
+            */
+            var name_tmp = $(b).attr('name');
+            if(InArr(editClass,$(b).attr('class'))){//编辑器取值
                 _debug('有个性编辑器...',$(b).attr('name'));
-                /*自带的编辑器,不是读取val而是html()*/
                 if(sendtype == 'post'){
                     form_data.append($(b).attr('name'), $(b).html());
                 }
                 if(sendtype == 'get'){
-                    getData[$(b).attr('name')] = $(b).html();
+                    form_data[$(b).attr('name')] = $(b).html();
+                }
+            }else{//非编辑器
+                var tmptype_input = $(b).attr('type');
+                if(sendtype == 'post'){
+                    _debug('---------post开始获取数据----------');
+                    if( tmptype_input == 'file' ){
+                        _debug(name_tmp);
+                        if($(b)[0].files[0]){
+                            form_data.append(name_tmp, $(b)[0].files[0]);
+                        }
+                    }else{
+                        /*------------加入对hceckbox的判断------------*/
+                        switch(tmptype_input){
+                            case 'checkbox':/*复选框取值方式不同*/
+                                if ($(b).get(0).checked) {
+                                    var v_tmp = $(b).val();
+                                }else{
+                                    var v_tmp = '';
+                                }
+                                _debug('---------提取checkbox值'+name_tmp+'--'+v_tmp+'--');
+                                form_data.append(name_tmp, v_tmp);
+                                break;
+                            case 'radio':/*复选框取值方式不同*/
+                                var v_tmp = $("input:radio[name='"+name_tmp+"']:checked").val();
+                                _debug('---------提取radio值'+name_tmp+'--'+v_tmp+'--');
+                                form_data.append(name_tmp, v_tmp);
+                                break;
+                            default:
+                                var v_tmp = $(b).val();
+                                _debug('---------提取input值'+name_tmp+'--'+v_tmp+'--');
+                                form_data.append(name_tmp, v_tmp);
+                                break;
+                        }
+                        /*------------加入对hceckbox的判断------------*/
+                    }
+                }
+                if(sendtype == 'get'){
+                        /*------------加入对hceckbox的判断------------*/
+                            _debug('---------get开始获取数据----------');
+                switch(tmptype_input){
+                    case 'checkbox':/*复选框取值方式不同*/
+                        if ($(b).get(0).checked) {
+                                form_data[name_tmp] = $(b).val();
+                            }else{
+                                form_data[name_tmp] = '';
+                            }
+                        break;
+                    case 'radio':/*复选框取值方式不同*/
+                        form_data[name_tmp] = $("input:radio[name='"+name_tmp+"']:checked").val();
+                        break;
+                    default:
+                        form_data[name_tmp] = $(b).val();
+                        break;
                 }
             }
         });

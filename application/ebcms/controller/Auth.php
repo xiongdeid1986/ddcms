@@ -14,14 +14,14 @@ class Auth extends Controller
     public function login()
     {
         // 登陆页面
-        if (request()->isGet()) {
+        if ( request()->isGet() ) {
             $this->assign('seo', [
                 'title' => '欢迎登陆网站管理系统',
                 'keywords' => '欢迎登陆网站管理系统',
                 'description' => '欢迎登陆网站管理系统',
             ]);
             return $this->fetch();
-        } elseif (request()->isPost()) {
+        } elseif ( request()->isPost() ) {
 
             // 验证验证码
             if (false !== \ebcms\Config::get('user.login_captcha')) {
